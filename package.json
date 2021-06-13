@@ -1,0 +1,17 @@
+{
+  "name": "o-an-quan",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "lerna run start --stream",
+    "start:fe": "lerna run start --ignore @o-an-quan/backend --stream",
+    "start:be": "lerna run start --ignore @o-an-quan/frontend --stream"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
