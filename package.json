@@ -12,10 +12,14 @@
     "start:be": "lerna run start --ignore @o-an-quan/frontend --stream"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.170",
+    "@types/nanoid": "^3.0.0",
     "lerna": "^4.0.0"
   },
   "dependencies": {
     "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
+    "nanoid": "^3.1.23",
     "typescript": "^4.3.2"
   }
 }

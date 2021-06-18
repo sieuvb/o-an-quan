@@ -6,8 +6,12 @@ import { observer } from 'mobx-react-lite';
 
 const { Title } = Typography;
 export const LoginPage = observer(() => {
-  const onClickEmit = () => {
-    appModel.socketModel.emit();
+  const onClickCreateRoom = () => {
+    appModel.socketModel.createRoom();
+  };
+
+  const onClickJoinRoom = () => {
+    appModel.socketModel.createRoom();
   };
   return (
     <PageWrapper>
@@ -16,7 +20,7 @@ export const LoginPage = observer(() => {
         <Tabs>
           <Tabs.TabPane tab="Create Room" key="CREATE_ROOM">
             <div className="btn-action">
-              <Button type="primary" block onClick={onClickEmit}>
+              <Button type="primary" block onClick={onClickCreateRoom}>
                 Create Room
               </Button>
             </div>
@@ -26,7 +30,12 @@ export const LoginPage = observer(() => {
               <Form.Item id="roomId">
                 <Input placeholder="Input room id" />
                 <div className="btn-action">
-                  <Button type="primary" htmlType="submit" block>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    block
+                    onClick={onClickJoinRoom}
+                  >
                     Join Room
                   </Button>
                 </div>
