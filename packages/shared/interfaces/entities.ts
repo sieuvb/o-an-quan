@@ -38,5 +38,5 @@ export interface IGameStep {
 export interface IRoomInfo {
   id: string;
   status: RoomStatus;
-  gameState?: IGameState;
+  gameState: IGameState;
 }

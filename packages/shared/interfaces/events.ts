@@ -1,9 +1,18 @@
+import { IRoomInfo } from './entities';
+
 export interface ICreateGameRoomEventProps {
+  playerId: string;
   playerName: string;
-  deviceId: string;
+  deviceId?: string;
+}
+
+export interface ICreateGameRoomSuccessEventProps {
+  roomInfo: IRoomInfo;
 }
 
 export interface IJoinGameRoomEventProps {
-  playerName: string;
-  roomId: string;
+  playerId: string;
+  deviceId?: string;
+  roomId?: string;
+  playerName?: string;
 }

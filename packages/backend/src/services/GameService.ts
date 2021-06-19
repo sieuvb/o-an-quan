@@ -53,18 +53,47 @@ export class GameService {
     return initialGameState;
   };
 
-  createRoom = (socketId: string, playerInfo: Omit<IPlayer, 'id'>) => {
+  createRoom = (playerid: string, playerInfo: Omit<IPlayer, 'id'>) => {
     const firstPlayer: IPlayer = {
-      id: socketId,
+      id: playerid,
       ...playerInfo,
     };
     const room: IRoomInfo = {
-      id: socketId,
+      id: playerid,
       status: RoomStatus.WAITING_FOR_PLAYERS,
       gameState: this.initGame(firstPlayer),
     };
-
     return gameRepository.createRoom(room);
+  };
+
+  getRoomInfo = (playerId: string) => {
+    const roomId = gameRepository.getRoomIdByPlayerId(playerId);
+    const roomInfo = gameRepository.getRoomInfo(roomId);
+    return roomInfo;
+  };
+
+  joinRoom = (
+    playerid: string,
+    roomId: string,
+    playerInfo: Omit<IPlayer, 'id'>,
+  ) => {
+    const roomInfo = gameRepository.getRoomInfo(roomId);
+    if (!roomInfo) {
+      throw 'Invalid room id';
+    }
+
+    if (roomInfo.status !== RoomStatus.WAITING_FOR_PLAYERS) {
+      throw 'Invalid room status';
+    }
+
+    const newPlayerInfo = { id: playerid, ...playerInfo };
+    let newRoomInfo = gameRepository.addRoomPlayers(roomId, newPlayerInfo);
+    if (newRoomInfo.gameState.players.length > 2) {
+      newRoomInfo = gameRepository.updateRoomStatus(roomId, RoomStatus.PLAYING);
+    }
+    gameRepository.mapPlayerToRoom(playerid, roomInfo.id);
+
+    return newRoomInfo;
   };
 }
 

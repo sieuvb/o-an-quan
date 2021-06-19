@@ -1,7 +1,6 @@
 import express from 'express';
 import { Server } from 'socket.io';
 import http from 'http';
-import { CREATE_ROOM } from '@o-an-quan/shared';
 import { GameEventHandlers } from './events';
 
 const SOCKET_PORT = 3003;
@@ -18,7 +17,7 @@ const socketServer = new Server(server, {
 socketServer.on('connection', (socket) => {
   const clientInfo = { id: socket.id, ipAddress: socket.handshake.address };
   console.log(`Connected id: ${JSON.stringify(clientInfo)}`);
-  new GameEventHandlers(socket);
+  new GameEventHandlers(socket, socketServer);
 });
 
 server.listen(process.env.port || SOCKET_PORT, () => {

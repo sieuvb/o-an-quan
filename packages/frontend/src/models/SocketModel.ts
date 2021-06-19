@@ -1,25 +1,62 @@
 import { makeAutoObservable } from 'mobx';
 import { Socket, io } from 'socket.io-client';
-import { CREATE_ROOM } from '@o-an-quan/shared';
+import {
+  CREATE_ROOM,
+  CREATE_ROOM_SUCCESS,
+  ICreateGameRoomEventProps,
+  IJoinGameRoomEventProps,
+  IRoomInfo,
+  ISocketResponsePayload,
+  JOIN_ROOM,
+  JOIN_ROOM_SUCCESS,
+  RELOAD_ROOM,
+  RELOAD_ROOM_SUCCESS,
+} from '@o-an-quan/shared';
+import { appModel } from './AppModel';
 
 export class SocketModel {
   socket: Socket;
+
   constructor() {
     makeAutoObservable(this);
-
-    this.socket = io(process.env.REACT_APP_BASE_URL || 'localhost:3003');
-
+    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost';
+    const socketPort = process.env.REACT_APP_SOCKET_PORT || '3003';
+    this.socket = io(`${socketUrl}:${socketPort}`);
     this.socket.on('connect', () => {
-      console.log('connected');
+      console.log(`Socket connected: ${this.socket.id}`);
     });
-    console.log({ env: process.env });
-    this.socket.emit('hello', 'hi from client');
-    this.socket.on('hello-client', () => {
-      console.log('receive hello');
-    });
+    this.socket.on(CREATE_ROOM_SUCCESS, this.handleCreateRoomSuccess);
+    this.socket.on(JOIN_ROOM_SUCCESS, this.handleJoinRoomSuccess);
+    this.socket.on(RELOAD_ROOM_SUCCESS, this.handleReloadRoomSuccess);
   }
 
-  createRoom = () => {
-    this.socket.emit(CREATE_ROOM, { name: 'test' });
+  createRoom = (payload: ICreateGameRoomEventProps) => {
+    this.socket.emit(CREATE_ROOM, payload);
+  };
+
+  joinRoom = (payload: IJoinGameRoomEventProps) => {
+    this.socket.emit(JOIN_ROOM, payload);
+  };
+
+  reloadRoom = (playerId: string) => {
+    this.socket.emit(RELOAD_ROOM, playerId);
+  };
+
+  handleCreateRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
+    const roomInfo = payload.data;
+    appModel.gameModel.initGame(roomInfo);
+    console.log('CREATE ROOM success', { payload });
+  };
+
+  handleJoinRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
+    const roomInfo = payload.data;
+    appModel.gameModel.initGame(roomInfo);
+    console.log('JOIN ROOM success', { payload });
+  };
+
+  handleReloadRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
+    const roomInfo = payload.data;
+    appModel.gameModel.initGame(roomInfo);
+    console.log('RELOAD ROOM success', { payload });
   };
 }
