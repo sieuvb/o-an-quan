@@ -4,9 +4,13 @@ WORKDIR /app
 
 COPY ./*.json ./
 
+COPY ./packages/shared/*.json ./packages/shared/
+
 COPY ./packages/backend/*.json ./packages/backend/
 
 RUN npx lerna bootstrap
+
+RUN yarn
 
 COPY . .
 
