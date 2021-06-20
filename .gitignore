@@ -1,1 +1,5 @@
 node_modules
+
+.env
+/packages/backend/.env
+/packages/frontend/.env
