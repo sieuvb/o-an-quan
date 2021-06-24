@@ -8,8 +8,12 @@
   ],
   "scripts": {
     "start": "lerna run start --stream",
+    "start:be": "lerna run start --ignore @o-an-quan/frontend --stream",
     "start:fe": "lerna run start --ignore @o-an-quan/backend --stream",
-    "start:be": "lerna run start --ignore @o-an-quan/frontend --stream"
+    "build:be": "docker build -t sieuvb/o-an-quan:dummy-be -f backend.Dockerfile .",
+    "build:fe": "docker build -t sieuvb/o-an-quan:dummy-fe -f frontend.Dockerfile .",
+    "start:docker": "docker-compose build && docker-compose up -d",
+    "stop:docker": "docker-compose down"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.170",
