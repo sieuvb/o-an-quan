@@ -1,4 +1,4 @@
-FROM locmai/node:16-alpine3.11-lerna
+FROM locmai/node:16-alpine3.11-lerna-0
 
 WORKDIR /app
 

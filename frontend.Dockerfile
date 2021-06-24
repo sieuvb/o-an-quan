@@ -1,4 +1,4 @@
-FROM locmai/node:16-alpine3.11-lerna
+FROM locmai/node:16-alpine3.11-lerna-0
 
 WORKDIR /app
 
@@ -14,6 +14,9 @@ RUN yarn
 
 COPY . .
 
+RUN yarn build:prod
+
+RUN yarn global add serve
 EXPOSE 3000
 
-CMD ["yarn","start:fe"]
+CMD ["serve","-s","/app/packages/frontend/build","-l","tcp://0.0.0.0:3000"]
