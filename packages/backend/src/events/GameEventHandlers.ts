@@ -23,7 +23,7 @@ export class GameEventHandlers extends BaseEventHandler {
     this.subscribeEvent(CREATE_ROOM, this.createRoomEventHandler);
     this.subscribeEvent(JOIN_ROOM, this.joinRoomEventHandler);
     this.subscribeEvent(RELOAD_ROOM, this.reloadGameInfoHandler);
-    this.subscribeEvent(USER_INPUT_STEP, this.userInputStepHandler);
+    this.subscribeEvent(USER_INPUT_MOVE, this.userInputMoveHandler);
   }
 
   createRoomEventHandler = (
