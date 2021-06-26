@@ -2,25 +2,28 @@ import { Server, Socket } from 'socket.io';
 import {
   CREATE_ROOM,
   CREATE_ROOM_SUCCESS,
+  USER_INPUT_MOVE,
   ICreateGameRoomEventProps,
   IJoinGameRoomEventProps,
+  IInputMoveProps,
   IRoomInfo,
   JOIN_ROOM,
   JOIN_ROOM_SUCCESS,
   RELOAD_ROOM,
   RELOAD_ROOM_SUCCESS,
   SocketResponseStatus,
+  MoveDirection,
 } from '@o-an-quan/shared';
 import { gameService } from '../services';
 import { BaseEventHandler, SocketResponse } from './BaseEventHandler';
 import { nanoid } from 'nanoid';
-
 export class GameEventHandlers extends BaseEventHandler {
   constructor(socket: Socket, socketServer: Server) {
     super(socket, socketServer);
     this.subscribeEvent(CREATE_ROOM, this.createRoomEventHandler);
     this.subscribeEvent(JOIN_ROOM, this.joinRoomEventHandler);
     this.subscribeEvent(RELOAD_ROOM, this.reloadGameInfoHandler);
+    this.subscribeEvent(USER_INPUT_STEP, this.userInputStepHandler);
   }
 
   createRoomEventHandler = (
@@ -83,6 +86,18 @@ export class GameEventHandlers extends BaseEventHandler {
       payload: {
         status: SocketResponseStatus.SUCCESS,
         data: roomInfo,
+        error: null,
+      },
+    };
+  };
+
+  userInputMoveHandler = (props: IInputMoveProps): SocketResponse<any, any> => {
+    console.log(`User ${props.playerId} move inputted`);
+    return {
+      event: USER_INPUT_MOVE,
+      payload: {
+        status: SocketResponseStatus.SUCCESS,
+        data: null,
         error: null,
       },
     };

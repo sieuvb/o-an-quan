@@ -4,6 +4,7 @@ import {
   CREATE_ROOM,
   CREATE_ROOM_SUCCESS,
   ICreateGameRoomEventProps,
+  IInputMoveProps,
   IJoinGameRoomEventProps,
   IRoomInfo,
   ISocketResponsePayload,
@@ -11,6 +12,7 @@ import {
   JOIN_ROOM_SUCCESS,
   RELOAD_ROOM,
   RELOAD_ROOM_SUCCESS,
+  USER_INPUT_MOVE,
 } from '@o-an-quan/shared';
 import { appModel } from './AppModel';
 
@@ -36,6 +38,10 @@ export class SocketModel {
 
   joinRoom = (payload: IJoinGameRoomEventProps) => {
     this.socket.emit(JOIN_ROOM, payload);
+  };
+
+  inputMove = (payload: IInputMoveProps) => {
+    this.socket.emit(USER_INPUT_MOVE, payload);
   };
 
   reloadRoom = (playerId: string) => {
