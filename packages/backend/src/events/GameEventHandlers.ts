@@ -2,10 +2,10 @@ import { Server, Socket } from 'socket.io';
 import {
   CREATE_ROOM,
   CREATE_ROOM_SUCCESS,
-  USER_INPUT_MOVE,
+  USER_INPUT_STEP,
   ICreateGameRoomEventProps,
   IJoinGameRoomEventProps,
-  IInputMoveProps,
+  IInputStepProps,
   IRoomInfo,
   JOIN_ROOM,
   JOIN_ROOM_SUCCESS,
@@ -23,7 +23,7 @@ export class GameEventHandlers extends BaseEventHandler {
     this.subscribeEvent(CREATE_ROOM, this.createRoomEventHandler);
     this.subscribeEvent(JOIN_ROOM, this.joinRoomEventHandler);
     this.subscribeEvent(RELOAD_ROOM, this.reloadGameInfoHandler);
-    this.subscribeEvent(USER_INPUT_MOVE, this.userInputMoveHandler);
+    this.subscribeEvent(USER_INPUT_STEP, this.userInputStepHandler);
   }
 
   createRoomEventHandler = (
@@ -36,6 +36,11 @@ export class GameEventHandlers extends BaseEventHandler {
       deviceId,
       ipAddress,
       name: playerName,
+      playerGameInfo: {
+        bigStoneNum: 0,
+        smallStoneNum: 0,
+        historySteps: [],
+      },
     };
     this.socket.join(playerId);
     const roomInfo = gameService.createRoom(playerId, playerInfo);
@@ -62,6 +67,11 @@ export class GameEventHandlers extends BaseEventHandler {
       deviceId,
       ipAddress,
       name: playerName,
+      playerGameInfo: {
+        bigStoneNum: 0,
+        smallStoneNum: 0,
+        historySteps: [],
+      },
     };
     const roomInfo = gameService.joinRoom(playerId, socketRoomId, playerInfo);
     this.socket.join(socketRoomId);
@@ -91,9 +101,10 @@ export class GameEventHandlers extends BaseEventHandler {
     };
   };
 
-  userInputMoveHandler = (props: IInputMoveProps): SocketResponse<any, any> => {
+  userInputStepHandler = (props: IInputStepProps): SocketResponse<any, any> => {
     const { roomId, squareId, moveDirection } = props;
-    const roomInfo = gameService.inputMove(
+    
+    const roomInfo = gameService.inputStep(
       roomId,
       squareId,
       moveDirection,
@@ -101,7 +112,7 @@ export class GameEventHandlers extends BaseEventHandler {
 
     
     return {
-      event: USER_INPUT_MOVE,
+      event: USER_INPUT_STEP,
       payload: {
         status: SocketResponseStatus.SUCCESS,
         data: roomInfo,

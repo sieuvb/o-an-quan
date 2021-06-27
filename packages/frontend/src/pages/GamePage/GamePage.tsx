@@ -26,7 +26,7 @@ export const GamePage = observer(() => {
     onClickDummyButton(MoveDirection.CCW);
   };
   const onClickDummyButton = (moveDirection: MoveDirection) => {
-    appModel.socketModel.inputMove({
+    appModel.socketModel.inputStep({
       roomId: roomInfo?.id ?? '',
       squareId: Number(squareId),
       moveDirection: moveDirection,

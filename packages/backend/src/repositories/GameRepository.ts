@@ -73,27 +73,42 @@ export class GameRepository {
     this.playerRoomMapper[playerId] = roomId;
   };
 
-  inputMoveByPlayer = (
-    roomId: string,
-    gameStep: IGameStep,
-  ) => {
+  inputPlayerStep = (roomId: string, gameStep: IGameStep) => {
     const roomInfo = this.roomsData[roomId];
-    const currentTurn = roomInfo.gameState?.currentTurn
+    const currentTurn = roomInfo.gameState?.currentTurn;
     const players = roomInfo.gameState?.players;
     const currentPlayer = players[currentTurn];
 
-    currentPlayer.playerGameInfo?.historySteps.push(gameStep);
-    
-    // Handle stone calculation
-    
+    currentPlayer.playerGameInfo.historySteps.push(gameStep);
+
+    return roomInfo;
+  };
+
+  putStoneOnPlayer = (
+    roomId: string,
+    numOfBigStones: number,
+    numOfSmallStones: number
+  ) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+    roomInfo.gameState.players[currentTurn].playerGameInfo.bigStoneNum = numOfBigStones;
+    roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum =
+      numOfSmallStones;
+    return roomInfo;
+  };
+
+  switchTurn = (roomId: string) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+
     if (currentTurn + 1 >= players.length) {
-      roomInfo.gameState.currentTurn = 0
-    }
-    else {
+      roomInfo.gameState.currentTurn = 0;
+    } else {
       roomInfo.gameState.currentTurn = currentTurn + 1;
     }
-
-    return roomInfo
+    return roomInfo;
   };
 }
 

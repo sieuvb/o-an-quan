@@ -12,4 +12,4 @@ export const RELOAD_ROOM_FAIL = 'RELOAD_ROOM_FAIL';
 
 export const FETCH_GAME_STATE = 'FETCH_GAME_STATE';
 
-export const USER_INPUT_MOVE = 'USER_INPUT_MOVE';
+export const USER_INPUT_STEP = 'USER_INPUT_STEP';

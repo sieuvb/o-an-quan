@@ -14,7 +14,7 @@ export interface IPlayer {
   name: string;
   deviceId: string;
   ipAddress: string;
-  playerGameInfo?: IPlayerGameInfo;
+  playerGameInfo: IPlayerGameInfo;
 }
 
 export interface IPlayerGameInfo {
