@@ -9,6 +9,7 @@ import {
   RoomStatus,
   SquareIndex,
   SquareType,
+  checkSquareIndexType
 } from '@o-an-quan/shared';
 import { gameRepository } from '../repositories';
 
@@ -23,16 +24,29 @@ const initSmallSquares = (playerIndex: number): IChessSquare[] =>
     return { id: genSquareId(squareInfo, playerIndex), ...squareInfo };
   });
 
-const initBigSquares = (): IChessSquare[] =>
-  ['left', 'right'].map((index) => {
-    const squareInfo: Omit<IChessSquare, 'id'> = {
-      type: SquareType.BIG_SQUARE,
-      index: index as SquareIndex,
-      bigStoneNum: 0,
-      smallStoneNum: INITIAL_SMALL_SQUARE_STONES,
-    };
-    return { id: genSquareId(squareInfo), ...squareInfo };
-  });
+const initSquares = (numOfPlayers: number = 2): IChessSquare[] => {
+  let squares = []
+
+  for (var index = 0; index < numOfPlayers * 5; index++) {
+    let type = checkSquareIndexType(index);
+    squares.push({
+      index,
+      type,
+      smallStoneNum: type == SquareType.BIG_SQUARE ? 0 : 5,
+      bigStoneNum: type == SquareType.BIG_SQUARE ? 1 : 0,
+    });
+  }
+  return squares;
+}
+  // ['left', 'right'].map((index) => {
+  //   const squareInfo: Omit<IChessSquare, 'id'> = {
+  //     type: SquareType.BIG_SQUARE,
+  //     index: index as SquareIndex,
+  //     bigStoneNum: 0,
+  //     smallStoneNum: INITIAL_SMALL_SQUARE_STONES,
+  //   };
+  //   return { id: genSquareId(squareInfo), ...squareInfo };
+  // });
 
 export class GameService {
   initGame = (firstPlayer: IPlayer) => {
@@ -45,9 +59,10 @@ export class GameService {
         smallSquares: initSmallSquares(1),
       },
     };
+
     const initialGameState: IGameState = {
       players: [firstPlayerInfo],
-      bigSquares: initBigSquares(),
+      squares: initSquares(),
     };
 
     return initialGameState;

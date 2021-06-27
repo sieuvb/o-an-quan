@@ -4,7 +4,6 @@ import { IGameState, IPlayer, IRoomInfo, RoomStatus } from '@o-an-quan/shared';
 export class GameRepository {
   private roomsData: Record<string, IRoomInfo> = {};
   private playerRoomMapper: Record<string, string> = {};
-
   getRoomInfo = (roomId: string) => {
     console.log({
       playerRoomMapper: this.playerRoomMapper,
