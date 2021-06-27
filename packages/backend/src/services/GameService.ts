@@ -125,12 +125,8 @@ export class GameService {
     let game = gameRepository.getRoomInfo(roomId);
 
     gameRepository.inputPlayerStep(roomId, gameStep);
-  
-    this.calculateSquares(
-      roomId,
-      game.gameState.squares,
-      gameStep,
-    );
+
+    this.calculateSquares(roomId, game.gameState.squares, gameStep);
 
     game = gameRepository.switchTurn(roomId);
 
@@ -147,18 +143,17 @@ export class GameService {
     let calculatedSquares = currentSquares;
 
     let selectedSquareIndex = gameStep.squareIndex;
-    let directionIndex = gameStep.moveDirection == MoveDirection.CW ? 1 : -1;
+    let directionIndex = gameStep.moveDirection == MoveDirection.CW ? -1 : 1;
     while (!end_loop) {
       // Get the number of stones in the selected square
       let numOfStonesSelected =
         calculatedSquares[selectedSquareIndex].smallStoneNum;
 
-      directionIndex = gameStep.moveDirection == MoveDirection.CW ? 1 : -1;
-
       // Pick up all the stones in the selected square
-      calculatedSquares[gameStep.squareIndex].smallStoneNum = 0;
+      calculatedSquares[selectedSquareIndex].smallStoneNum = 0;
 
-      let currentIndex = gameStep.squareIndex;
+      let currentIndex = selectedSquareIndex;
+
       while (numOfStonesSelected > 0) {
         const nextIndex = this.getNextIndex(
           currentIndex,
@@ -192,9 +187,11 @@ export class GameService {
           directionIndex,
           currentSquares.length,
         );
+
         let next2Square = calculatedSquares[next2Index];
         let nextIndex;
         if (next2Square.smallStoneNum == 0 && next2Square.bigStoneNum == 0) {
+          console.log('Stopped due to 2 blank squares');
           break;
         } else {
           // Calculate taking the valid squares.
@@ -206,9 +203,11 @@ export class GameService {
             ) {
               gameRepository.putStoneOnPlayer(
                 roomId,
-                next2Square.smallStoneNum,
                 next2Square.bigStoneNum,
+                next2Square.smallStoneNum,
               );
+              next2Square.smallStoneNum = 0;
+              next2Square.bigStoneNum = 0 
             } else {
               end_taking_loop = true;
             }
@@ -229,6 +228,12 @@ export class GameService {
           }
         }
       }
+      // Keep moving with the next square:
+      selectedSquareIndex = this.getNextIndex(
+        currentIndex,
+        directionIndex,
+        currentSquares.length,
+      );
     }
 
     return {
@@ -244,9 +249,9 @@ export class GameService {
     squaresLenght: number,
   ): number => {
     if (directionIndex == -1 && currentIndex == 0) {
-      return (currentIndex = squaresLenght);
+      return (currentIndex = squaresLenght - 1);
     } else if (directionIndex == 1 && currentIndex == squaresLenght - 1) {
-      return (currentIndex = -1);
+      return (currentIndex = 0);
     } else {
       return (currentIndex = currentIndex + directionIndex);
     }
