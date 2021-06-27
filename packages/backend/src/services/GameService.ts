@@ -52,6 +52,7 @@ export class GameService {
 
     const initialGameState: IGameState = {
       players: [firstPlayerInfo],
+      currentTurn: 0,
       squares: initSquares(),
     };
 
@@ -111,13 +112,11 @@ export class GameService {
 
   inputMove = (
     roomId: string,
-    playerId: string,
     squareIndex: number,
     moveDirection: MoveDirection,
   ) => {
     return gameRepository.inputMoveByPlayer(
       roomId,
-      playerId,
       {
         squareIndex,
         moveDirection

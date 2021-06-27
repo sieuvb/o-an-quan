@@ -75,15 +75,23 @@ export class GameRepository {
 
   inputMoveByPlayer = (
     roomId: string,
-    playerId: string,
     gameStep: IGameStep,
   ) => {
     const roomInfo = this.roomsData[roomId];
-    const roomPlayers = roomInfo.gameState?.players;
-    const player = roomPlayers.find(({ id }) => id === playerId);
-    player?.playerGameInfo?.historySteps.push(
-      gameStep
-    );
+    const currentTurn = roomInfo.gameState?.currentTurn
+    const players = roomInfo.gameState?.players;
+    const currentPlayer = players[currentTurn];
+
+    currentPlayer.playerGameInfo?.historySteps.push(gameStep);
+    
+    // Handle stone calculation
+    
+    if (currentTurn + 1 >= players.length) {
+      roomInfo.gameState.currentTurn = 0
+    }
+    else {
+      roomInfo.gameState.currentTurn = currentTurn + 1;
+    }
 
     return roomInfo
   };

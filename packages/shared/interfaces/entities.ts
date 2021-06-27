@@ -25,6 +25,7 @@ export interface IPlayerGameInfo {
 
 export interface IGameState {
   players: IPlayer[];
+  currentTurn: number;
   squares: IChessSquare[];
 }
 
