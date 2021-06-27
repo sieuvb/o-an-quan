@@ -124,12 +124,16 @@ export class GameService {
 
     let game = gameRepository.getRoomInfo(roomId);
 
+    // Check selected square has stone.
+    
     gameRepository.inputPlayerStep(roomId, gameStep);
 
     this.calculateSquares(roomId, game.gameState.squares, gameStep);
 
     game = gameRepository.switchTurn(roomId);
 
+    // Check if both Big square is blank.
+    // Check other player turn if empty
     return game;
   };
 
@@ -226,6 +230,7 @@ export class GameService {
             nextSquare = currentSquares[nextIndex];
             next2Square = currentSquares[next2Index];
           }
+          break;
         }
       }
       // Keep moving with the next square:
