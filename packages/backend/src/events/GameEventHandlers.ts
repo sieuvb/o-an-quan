@@ -93,11 +93,21 @@ export class GameEventHandlers extends BaseEventHandler {
 
   userInputMoveHandler = (props: IInputMoveProps): SocketResponse<any, any> => {
     console.log(`User ${props.playerId} move inputted`);
+
+    const { roomId, playerId, squareId, moveDirection } = props;
+    const roomInfo = gameService.inputMove(
+      roomId,
+      playerId,
+      squareId,
+      moveDirection,
+    );
+
+    
     return {
       event: USER_INPUT_MOVE,
       payload: {
         status: SocketResponseStatus.SUCCESS,
-        data: null,
+        data: roomInfo,
         error: null,
       },
     };

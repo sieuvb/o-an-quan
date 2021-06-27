@@ -27,9 +27,9 @@ export const GamePage = observer(() => {
   };
   const onClickDummyButton = (moveDirection: MoveDirection) => {
     appModel.socketModel.inputMove({
-      playerId: currPlayer?.id,
-      roomId: roomInfo?.id,
-      squareId: squareId,
+      playerId: currPlayer?.id ?? '',
+      roomId: roomInfo?.id ?? '',
+      squareId: Number(squareId),
       moveDirection: moveDirection,
     });
   };

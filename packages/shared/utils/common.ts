@@ -7,8 +7,8 @@ export const genSquareId = (
 ) => `${playerIndex}_${square.type}_${square.index}`;
 
 // checkSquareIndexType Check index of a square and return the square type
-export const checkSquareIndexType = (index: number): SquareType => {
-  if ((index + 1) % 6 == 0) {
+export const checkSquareIndexType = (index: number, numOfSquaresPerPlayer: number = 5): SquareType => {
+  if ((index + 1) % (numOfSquaresPerPlayer+1) == 0) {
     return SquareType.BIG_SQUARE;
   }
   return SquareType.SMALL_SQUARE

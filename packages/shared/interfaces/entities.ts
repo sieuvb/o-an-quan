@@ -20,7 +20,6 @@ export interface IPlayer {
 export interface IPlayerGameInfo {
   smallStoneNum: number;
   bigStoneNum: number;
-  smallSquares: IChessSquare[];
   historySteps: IGameStep[];
 }
 
@@ -30,7 +29,7 @@ export interface IGameState {
 }
 
 export interface IGameStep {
-  squareIndex: [1, 2, 3, 4, 5];
+  squareIndex: number;
   moveDirection: MoveDirection;
 }
 

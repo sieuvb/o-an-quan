@@ -19,8 +19,8 @@ export interface IJoinGameRoomEventProps {
 }
 
 export interface IInputMoveProps {
-  playerId?: string;
-  roomId?: string;
-  squareId?: string;
+  roomId: string;
+  playerId: string;
+  squareId: number;
   moveDirection: MoveDirection;
 }

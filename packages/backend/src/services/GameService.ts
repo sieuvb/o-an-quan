@@ -4,49 +4,40 @@ import {
   IChessSquare,
   IGameState,
   INITIAL_SMALL_SQUARE_STONES,
+  INITIAL_BIG_SQUARE_STONES,
   IPlayer,
   IRoomInfo,
   RoomStatus,
   SquareIndex,
   SquareType,
-  checkSquareIndexType
+  checkSquareIndexType,
+  MoveDirection,
 } from '@o-an-quan/shared';
 import { gameRepository } from '../repositories';
 
-const initSmallSquares = (playerIndex: number): IChessSquare[] =>
-  [1, 2, 3, 4, 5].map((index) => {
-    const squareInfo: Omit<IChessSquare, 'id'> = {
-      type: SquareType.SMALL_SQUARE,
-      index,
-      bigStoneNum: 0,
-      smallStoneNum: INITIAL_SMALL_SQUARE_STONES,
-    };
-    return { id: genSquareId(squareInfo, playerIndex), ...squareInfo };
-  });
+const initSquares = (
+  numOfPlayers: number = 2,
+  numOfSquaresPerPlayer: number = 5,
+): IChessSquare[] => {
+  let squares = [];
 
-const initSquares = (numOfPlayers: number = 2): IChessSquare[] => {
-  let squares = []
-
-  for (var index = 0; index < numOfPlayers * 5; index++) {
-    let type = checkSquareIndexType(index);
+  for (
+    var index = 0;
+    index < numOfPlayers * (numOfSquaresPerPlayer + 1);
+    index++
+  ) {
+    let type = checkSquareIndexType(index, numOfSquaresPerPlayer);
     squares.push({
       index,
       type,
-      smallStoneNum: type == SquareType.BIG_SQUARE ? 0 : 5,
-      bigStoneNum: type == SquareType.BIG_SQUARE ? 1 : 0,
+      smallStoneNum:
+        type == SquareType.BIG_SQUARE ? 0 : INITIAL_SMALL_SQUARE_STONES,
+      bigStoneNum:
+        type == SquareType.BIG_SQUARE ? INITIAL_BIG_SQUARE_STONES : 0,
     });
   }
   return squares;
-}
-  // ['left', 'right'].map((index) => {
-  //   const squareInfo: Omit<IChessSquare, 'id'> = {
-  //     type: SquareType.BIG_SQUARE,
-  //     index: index as SquareIndex,
-  //     bigStoneNum: 0,
-  //     smallStoneNum: INITIAL_SMALL_SQUARE_STONES,
-  //   };
-  //   return { id: genSquareId(squareInfo), ...squareInfo };
-  // });
+};
 
 export class GameService {
   initGame = (firstPlayer: IPlayer) => {
@@ -56,7 +47,6 @@ export class GameService {
         bigStoneNum: 0,
         smallStoneNum: 0,
         historySteps: [],
-        smallSquares: initSmallSquares(1),
       },
     };
 
@@ -101,7 +91,15 @@ export class GameService {
       throw 'Invalid room status';
     }
 
-    const newPlayerInfo = { id: playerid, ...playerInfo };
+    const newPlayerInfo = {
+      id: playerid,
+      ...playerInfo,
+      playerGameInfo: {
+        bigStoneNum: 0,
+        smallStoneNum: 0,
+        historySteps: [],
+      },
+    };
     let newRoomInfo = gameRepository.addRoomPlayers(roomId, newPlayerInfo);
     if (newRoomInfo.gameState.players.length > 2) {
       newRoomInfo = gameRepository.updateRoomStatus(roomId, RoomStatus.PLAYING);
@@ -109,6 +107,22 @@ export class GameService {
     gameRepository.mapPlayerToRoom(playerid, roomInfo.id);
 
     return newRoomInfo;
+  };
+
+  inputMove = (
+    roomId: string,
+    playerId: string,
+    squareIndex: number,
+    moveDirection: MoveDirection,
+  ) => {
+    return gameRepository.inputMoveByPlayer(
+      roomId,
+      playerId,
+      {
+        squareIndex,
+        moveDirection
+      }
+    )
   };
 }
 

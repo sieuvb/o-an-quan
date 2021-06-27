@@ -1,5 +1,11 @@
 //TODO: Replace it by Redis
-import { IGameState, IPlayer, IRoomInfo, RoomStatus } from '@o-an-quan/shared';
+import {
+  IGameState,
+  IGameStep,
+  IPlayer,
+  IRoomInfo,
+  RoomStatus,
+} from '@o-an-quan/shared';
 
 export class GameRepository {
   private roomsData: Record<string, IRoomInfo> = {};
@@ -65,6 +71,21 @@ export class GameRepository {
 
   mapPlayerToRoom = (playerId: string, roomId: string) => {
     this.playerRoomMapper[playerId] = roomId;
+  };
+
+  inputMoveByPlayer = (
+    roomId: string,
+    playerId: string,
+    gameStep: IGameStep,
+  ) => {
+    const roomInfo = this.roomsData[roomId];
+    const roomPlayers = roomInfo.gameState?.players;
+    const player = roomPlayers.find(({ id }) => id === playerId);
+    player?.playerGameInfo?.historySteps.push(
+      gameStep
+    );
+
+    return roomInfo
   };
 }
 
