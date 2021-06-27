@@ -87,14 +87,27 @@ export class GameRepository {
   putStoneOnPlayer = (
     roomId: string,
     numOfBigStones: number,
-    numOfSmallStones: number
+    numOfSmallStones: number,
   ) => {
     const roomInfo = this.roomsData[roomId];
     const currentTurn = roomInfo.gameState?.currentTurn;
     const players = roomInfo.gameState?.players;
-    roomInfo.gameState.players[currentTurn].playerGameInfo.bigStoneNum = numOfBigStones;
+    roomInfo.gameState.players[currentTurn].playerGameInfo.bigStoneNum =
+      numOfBigStones;
     roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum =
       numOfSmallStones;
+    return roomInfo;
+  };
+
+  takeSmallStoneFromPlayer = (
+    roomId: string,
+    numOfSmallStonesTaken: number,
+  ) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+    let smallStoneNum = roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum
+    smallStoneNum = smallStoneNum - numOfSmallStonesTaken;
     return roomInfo;
   };
 

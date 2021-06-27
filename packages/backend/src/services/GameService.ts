@@ -13,6 +13,7 @@ import {
   checkSquareIndexType,
   MoveDirection,
   IGameStep,
+  StepAction,
 } from '@o-an-quan/shared';
 import { gameRepository } from '../repositories';
 import { TupleType } from 'typescript';
@@ -120,29 +121,65 @@ export class GameService {
     const gameStep: IGameStep = {
       squareIndex,
       moveDirection,
+      steps: [],
     };
 
     let game = gameRepository.getRoomInfo(roomId);
 
-    // Check selected square has stone.
-    
-    gameRepository.inputPlayerStep(roomId, gameStep);
+    if (this.squareIsBlank(game.gameState?.squares[squareIndex])) {
+      throw new Error('Selected square must contains stone(s)');
+    }
 
-    this.calculateSquares(roomId, game.gameState.squares, gameStep);
+    const resultGameStep = this.calculateGameStep(
+      roomId,
+      game.gameState.squares,
+      gameStep,
+    );
 
     game = gameRepository.switchTurn(roomId);
 
     // Check if both Big square is blank.
+    if (
+      this.squareIsBlank(game.gameState?.squares[0]) &&
+      this.squareIsBlank(game.gameState?.squares[11])
+    ) {
+      game = gameRepository.updateRoomStatus(roomId, RoomStatus.FINISHED);
+      return game;
+    }
+
     // Check other player turn if empty
+    const currentTurn = game.gameState.currentTurn;
+    const minIndex = currentTurn * 6;
+    const maxIndex = currentTurn * 6 + 5;
+    const nextPlayerSquares = game.gameState.squares.slice(
+      minIndex,
+      maxIndex,
+    );
+    nextPlayerSquares[0].smallStoneNum;
+    if (nextPlayerSquares.every(({ smallStoneNum }) => smallStoneNum == 0)) {
+      gameRepository.takeSmallStoneFromPlayer(roomId, 5);
+      for (let index = minIndex; index < maxIndex; index++) {
+        game.gameState.squares[index].smallStoneNum = 1
+        gameStep.steps.push({
+          action: StepAction.REPUT,
+          squareId: index,
+          smallStoneNum: 1,
+          bigStoneNum: 0,
+        });
+      }
+    }
+
+    game = gameRepository.inputPlayerStep(roomId, resultGameStep);
+
     return game;
   };
 
   // returned list of squares, number of big stones and small stone the user got.
-  private calculateSquares = (
+  private calculateGameStep = (
     roomId: string,
     currentSquares: IChessSquare[],
     gameStep: IGameStep,
-  ): any => {
+  ): IGameStep => {
     let end_loop = false;
     let calculatedSquares = currentSquares;
 
@@ -155,6 +192,12 @@ export class GameService {
 
       // Pick up all the stones in the selected square
       calculatedSquares[selectedSquareIndex].smallStoneNum = 0;
+      gameStep.steps.push({
+        action: StepAction.MOVE,
+        squareId: selectedSquareIndex,
+        smallStoneNum: calculatedSquares[selectedSquareIndex].smallStoneNum,
+        bigStoneNum: calculatedSquares[selectedSquareIndex].bigStoneNum,
+      });
 
       let currentIndex = selectedSquareIndex;
 
@@ -166,6 +209,13 @@ export class GameService {
         );
 
         calculatedSquares[nextIndex].smallStoneNum++;
+
+        gameStep.steps.push({
+          action: StepAction.REPUT,
+          squareId: nextIndex,
+          smallStoneNum: calculatedSquares[nextIndex].smallStoneNum,
+          bigStoneNum: calculatedSquares[nextIndex].bigStoneNum,
+        });
 
         currentIndex = nextIndex;
         numOfStonesSelected--;
@@ -211,7 +261,14 @@ export class GameService {
                 next2Square.smallStoneNum,
               );
               next2Square.smallStoneNum = 0;
-              next2Square.bigStoneNum = 0 
+              next2Square.bigStoneNum = 0;
+
+              gameStep.steps.push({
+                action: StepAction.TAKE,
+                squareId: next2Index,
+                smallStoneNum: next2Square.smallStoneNum,
+                bigStoneNum: next2Square.bigStoneNum,
+              });
             } else {
               end_taking_loop = true;
             }
@@ -241,11 +298,7 @@ export class GameService {
       );
     }
 
-    return {
-      squares: [],
-      bigStone: 0,
-      smallStone: 10,
-    };
+    return gameStep;
   };
 
   private getNextIndex = (

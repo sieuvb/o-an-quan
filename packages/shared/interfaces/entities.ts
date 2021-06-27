@@ -1,4 +1,4 @@
-import { MoveDirection, RoomStatus, SquareType } from '../enums/common';
+import { MoveDirection, RoomStatus, SquareType, StepAction } from '../enums/common';
 
 export type SquareIndex = number | 'left' | 'right';
 
@@ -32,6 +32,7 @@ export interface IGameState {
 export interface IGameStep {
   squareIndex: number;
   moveDirection: MoveDirection;
+  steps: any[]
 }
 
 export interface IRoomInfo {
