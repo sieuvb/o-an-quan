@@ -18,3 +18,9 @@ export enum SocketResponseStatus {
   SUCCESS = 'SUCCESS',
   FAIL = 'FAIL',
 }
+
+export enum StepAction{
+  MOVE = 'MOVE',
+  TAKE = 'TAKE',
+  REPUT = 'REPUT'
+}

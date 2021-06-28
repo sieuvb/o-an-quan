@@ -1,3 +1,4 @@
+import { MoveDirection } from '../enums';
 import { IRoomInfo } from './entities';
 
 export interface ICreateGameRoomEventProps {
@@ -15,4 +16,10 @@ export interface IJoinGameRoomEventProps {
   deviceId?: string;
   roomId?: string;
   playerName?: string;
+}
+
+export interface IInputStepProps {
+  roomId: string;
+  squareId: number;
+  moveDirection: MoveDirection;
 }
