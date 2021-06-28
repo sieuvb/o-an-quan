@@ -140,7 +140,7 @@ export class GameService {
 
     // Check if both Big square is blank.
     if (
-      this.squareIsBlank(game.gameState?.squares[0]) &&
+      this.squareIsBlank(game.gameState?.squares[5]) &&
       this.squareIsBlank(game.gameState?.squares[11])
     ) {
       game = gameRepository.updateRoomStatus(roomId, RoomStatus.FINISHED);
@@ -195,8 +195,8 @@ export class GameService {
       gameStep.steps.push({
         action: StepAction.MOVE,
         squareId: selectedSquareIndex,
-        smallStoneNum: calculatedSquares[selectedSquareIndex].smallStoneNum,
-        bigStoneNum: calculatedSquares[selectedSquareIndex].bigStoneNum,
+        smallStoneNum: 0,
+        bigStoneNum: 0
       });
 
       let currentIndex = selectedSquareIndex;
