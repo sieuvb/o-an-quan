@@ -12,7 +12,7 @@ const App = observer(() => {
   const RenderComponent = shouldLogin ? LoginPage : GamePage;
   return (
     <Router>
-      <RenderComponent />
+      <GamePage />
     </Router>
   );
 });

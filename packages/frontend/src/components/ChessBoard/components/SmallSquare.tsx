@@ -1,16 +1,31 @@
 import React from 'react';
 import styled from 'styled-components';
+import { IChessSquare } from '@o-an-quan/shared';
+import { gridItemStyles } from './styles';
 
 const SquareWrapper = styled.div`
-  width: 150px;
-  height: 150px;
-  border: 2px solid black;
+  margin: auto;
+  width: var(--small-square-size);
+  height: var(--small-square-size);
+  border-right: 2px solid black;
+  border-bottom: 2px solid black;
+  /* & + & {
+    border-top: none;
+    border-right: none;
+  } */
 `;
 
-export interface ISmallSquareProps {}
+export interface ISmallSquareProps {
+  square: IChessSquare;
+}
 
 export const SmallSquare: React.FunctionComponent<ISmallSquareProps> = ({
-  children,
+  square,
 }) => {
-  return <SquareWrapper>{children}</SquareWrapper>;
+  const { smallStoneNum, index } = square;
+  return (
+    <SquareWrapper>
+      index: {index} / {smallStoneNum}
+    </SquareWrapper>
+  );
 };

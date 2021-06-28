@@ -1,10 +1,12 @@
 import { MoveDirection, RoomStatus, SquareType } from '../enums/common';
 
 export type SquareIndex = number | 'left' | 'right';
-
+export type PlayerIndex = 1 | 2;
 export interface IChessSquare {
-  id: string;
-  index: SquareIndex;
+  //TODO
+  id?: string;
+  playerIndex?: PlayerIndex;
+  index: number;
   type: SquareType;
   smallStoneNum: number;
   bigStoneNum: number;
@@ -12,6 +14,7 @@ export interface IChessSquare {
 
 export interface IPlayer {
   id: string;
+  index: PlayerIndex;
   name: string;
   deviceId: string;
   ipAddress: string;
@@ -27,7 +30,8 @@ export interface IPlayerGameInfo {
 
 export interface IGameState {
   players: IPlayer[];
-  bigSquares: IChessSquare[];
+  currentTurn: PlayerIndex;
+  squares: IChessSquare[];
 }
 
 export interface IGameStep {

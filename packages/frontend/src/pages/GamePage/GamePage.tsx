@@ -9,11 +9,12 @@ export const GamePage = observer(() => {
     rivalPlayer,
     gameSharingLink,
     isRoomOwner,
+    roomInfo,
   } = appModel.gameModel;
   return (
     <PageWrapper>
       <PlayerCard player={rivalPlayer} />
-      <ChessBoard />
+      {roomInfo?.gameState && <ChessBoard gameState={roomInfo.gameState} />}
       <PlayerCard player={currPlayer} isCurrPlayer />
       {isRoomOwner && (
         <GameSharingLink className="link-sharing" link={gameSharingLink} />

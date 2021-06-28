@@ -1,9 +1,108 @@
-import { IRoomInfo, PLAYER_ID_KEY, ROOM_KEY } from '@o-an-quan/shared';
+import {
+  IRoomInfo,
+  PLAYER_ID_KEY,
+  RoomStatus,
+  ROOM_KEY,
+} from '@o-an-quan/shared';
+import isEmpty from 'lodash/isEmpty';
 import { makeAutoObservable } from 'mobx';
 import { nanoid } from 'nanoid';
 
+const MOCK_GAME_ROOM = {
+  id: 'EBRYdpExO2lZhfmLthhuo',
+  status: RoomStatus.WAITING_FOR_PLAYERS,
+  gameState: {
+    players: [],
+    currentTurn: 1,
+    squares: [
+      {
+        index: 0,
+        playerIndex: 1,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 1,
+        playerIndex: 1,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 2,
+        playerIndex: 1,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 3,
+        playerIndex: 1,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 4,
+        playerIndex: 1,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 5,
+        type: 'BIG_SQUARE',
+        smallStoneNum: 0,
+        bigStoneNum: 1,
+      },
+      {
+        index: 6,
+        playerIndex: 2,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 7,
+        playerIndex: 2,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 8,
+        playerIndex: 2,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 9,
+        playerIndex: 2,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 10,
+        playerIndex: 2,
+        type: 'SMALL_SQUARE',
+        smallStoneNum: 5,
+        bigStoneNum: 0,
+      },
+      {
+        index: 11,
+        type: 'BIG_SQUARE',
+        smallStoneNum: 0,
+        bigStoneNum: 1,
+      },
+    ],
+  },
+};
+
 export class GameModel {
-  roomInfo: IRoomInfo | null = null;
+  roomInfo: IRoomInfo | null = MOCK_GAME_ROOM as IRoomInfo;
   currPlayerId: string = sessionStorage.getItem(PLAYER_ID_KEY) || '';
 
   constructor() {
