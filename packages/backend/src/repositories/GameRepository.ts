@@ -1,10 +1,15 @@
 //TODO: Replace it by Redis
-import { IGameState, IPlayer, IRoomInfo, RoomStatus } from '@o-an-quan/shared';
+import {
+  IGameState,
+  IGameStep,
+  IPlayer,
+  IRoomInfo,
+  RoomStatus,
+} from '@o-an-quan/shared';
 
 export class GameRepository {
   private roomsData: Record<string, IRoomInfo> = {};
   private playerRoomMapper: Record<string, string> = {};
-
   getRoomInfo = (roomId: string) => {
     console.log({
       playerRoomMapper: this.playerRoomMapper,
@@ -66,6 +71,57 @@ export class GameRepository {
 
   mapPlayerToRoom = (playerId: string, roomId: string) => {
     this.playerRoomMapper[playerId] = roomId;
+  };
+
+  inputPlayerStep = (roomId: string, gameStep: IGameStep) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+    const currentPlayer = players[currentTurn];
+
+    currentPlayer.playerGameInfo.historySteps.push(gameStep);
+
+    return roomInfo;
+  };
+
+  putStoneOnPlayer = (
+    roomId: string,
+    numOfBigStones: number,
+    numOfSmallStones: number,
+  ) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+    roomInfo.gameState.players[currentTurn].playerGameInfo.bigStoneNum =
+      numOfBigStones;
+    roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum =
+      numOfSmallStones;
+    return roomInfo;
+  };
+
+  takeSmallStoneFromPlayer = (
+    roomId: string,
+    numOfSmallStonesTaken: number,
+  ) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+    let smallStoneNum = roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum
+    smallStoneNum = smallStoneNum - numOfSmallStonesTaken;
+    return roomInfo;
+  };
+
+  switchTurn = (roomId: string) => {
+    const roomInfo = this.roomsData[roomId];
+    const currentTurn = roomInfo.gameState?.currentTurn;
+    const players = roomInfo.gameState?.players;
+
+    if (currentTurn + 1 >= players.length) {
+      roomInfo.gameState.currentTurn = 0;
+    } else {
+      roomInfo.gameState.currentTurn = currentTurn + 1;
+    }
+    return roomInfo;
   };
 }
 

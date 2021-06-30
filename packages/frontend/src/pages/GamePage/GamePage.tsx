@@ -1,3 +1,4 @@
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { appModel } from 'models';
 import { PlayerCard, ChessBoard, GameSharingLink } from 'components';
