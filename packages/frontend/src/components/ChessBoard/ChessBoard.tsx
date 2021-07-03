@@ -2,11 +2,13 @@ import React from 'react';
 import sortBy from 'lodash/sortBy';
 import last from 'lodash/last';
 import styled from 'styled-components';
-import { BIG_SQUARE_INDEX, IGameState, SquareType } from '@o-an-quan/shared';
-import { BigSquare, SmallSquare } from './components';
-import { layoutStyles } from './layoutStyles';
 import { observer } from 'mobx-react-lite';
 import { appModel } from 'models';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { BigSquareType, IGameState, PLAYER_SQUARES } from '@o-an-quan/shared';
+import { BigSquare, SmallSquare, DragLayer } from './components';
+import { layoutStyles } from './layoutStyles';
 
 export const BoardWrapper = styled.div`
   ${layoutStyles};
@@ -26,8 +28,8 @@ export const BoardWrapper = styled.div`
 
 const SmallSquaresWrapper = styled.div`
   grid-area: small-squares;
-  border-top: 2px solid black;
-  border-left: 2px solid black;
+  border-top: var(--square-border);
+  border-left: var(--square-border);
   height: 100%;
 `;
 
@@ -45,20 +47,20 @@ export interface IChessBoardProps {
 
 export const ChessBoard: React.FC<IChessBoardProps> = observer(
   ({ gameState }) => {
-    // const { currPlayer } = appModel.gameModel;
-    const currPlayer = { index: 1 };
+    const { currPlayer, rivalPlayer } = appModel.gameModel;
+    if (!currPlayer || !rivalPlayer) {
+      return null;
+    }
     const { squares = [], currentTurn } = gameState;
     const currPlayerSquares = sortBy(
-      squares.filter(
-        ({ playerIndex, type }) =>
-          currPlayer?.index === playerIndex && type === SquareType.SMALL_SQUARE,
+      squares.filter(({ index }) =>
+        PLAYER_SQUARES[currPlayer.index].includes(index),
       ),
       'index',
     );
     const rivalPlayerSquares = sortBy(
-      squares.filter(
-        ({ playerIndex, type }) =>
-          currPlayer?.index !== playerIndex && type === SquareType.SMALL_SQUARE,
+      squares.filter(({ index }) =>
+        PLAYER_SQUARES[rivalPlayer.index].includes(index),
       ),
       'index',
     );
@@ -75,22 +77,25 @@ export const ChessBoard: React.FC<IChessBoardProps> = observer(
     }
 
     return (
-      <BoardWrapper>
-        <BigSquare square={leftBigSquare} gridArea="l-big-square" />
-        <SmallSquaresWrapper>
-          <SmallSquaresRow isReversed>
-            {rivalPlayerSquares.map((square) => (
-              <SmallSquare key={square.index} square={square} {...square} />
-            ))}
-          </SmallSquaresRow>
-          <SmallSquaresRow isReversed>
-            {currPlayerSquares.map((square) => (
-              <SmallSquare key={square.index} square={square} {...square} />
-            ))}
-          </SmallSquaresRow>
-        </SmallSquaresWrapper>
-        <BigSquare square={rightBigSquare} gridArea="r-big-square" />
-      </BoardWrapper>
+      <DndProvider backend={HTML5Backend}>
+        {/* <DragLayer /> */}
+        <BoardWrapper>
+          <BigSquare square={leftBigSquare} type={BigSquareType.LEFT} />
+          <SmallSquaresWrapper>
+            <SmallSquaresRow isReversed>
+              {rivalPlayerSquares.map((square) => (
+                <SmallSquare key={square.index} square={square} {...square} />
+              ))}
+            </SmallSquaresRow>
+            <SmallSquaresRow>
+              {currPlayerSquares.map((square) => (
+                <SmallSquare key={square.index} square={square} {...square} />
+              ))}
+            </SmallSquaresRow>
+          </SmallSquaresWrapper>
+          <BigSquare square={rightBigSquare} type={BigSquareType.RIGHT} />
+        </BoardWrapper>
+      </DndProvider>
     );
   },
 );

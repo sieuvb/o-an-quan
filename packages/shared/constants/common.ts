@@ -6,6 +6,7 @@ export const BIG_SQUARE_INDEX = {
   LEFT: 11,
   RIGHT: 5,
 };
+export const PLAYER_SQUARES = [[], [0, 1, 2, 3, 4], [6, 7, 8, 9, 10]];
 
 export const DEVICE_ID_KEY = 'device-id';
 export const PLAYER_ID_KEY = 'player-id';

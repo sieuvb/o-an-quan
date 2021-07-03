@@ -20,6 +20,6 @@ export interface IJoinGameRoomEventProps {
 
 export interface IInputStepProps {
   roomId: string;
-  squareId: number;
+  squareIndex: number;
   moveDirection: MoveDirection;
 }

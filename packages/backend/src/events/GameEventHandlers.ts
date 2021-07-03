@@ -102,15 +102,10 @@ export class GameEventHandlers extends BaseEventHandler {
   };
 
   userInputStepHandler = (props: IInputStepProps): SocketResponse<any, any> => {
-    const { roomId, squareId, moveDirection } = props;
-    
-    const roomInfo = gameService.inputStep(
-      roomId,
-      squareId,
-      moveDirection,
-    );
+    const { roomId, squareIndex, moveDirection } = props;
 
-    
+    const roomInfo = gameService.inputStep(roomId, squareIndex, moveDirection);
+
     return {
       event: USER_INPUT_STEP,
       payload: {

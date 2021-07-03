@@ -1,18 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import { IChessSquare } from '@o-an-quan/shared';
-import { gridItemStyles } from './styles';
+import { DragSquare } from './DragSquare';
 
-const SquareWrapper = styled.div`
-  margin: auto;
+const SquareWrapper = styled(DragSquare)`
   width: var(--small-square-size);
   height: var(--small-square-size);
-  border-right: 2px solid black;
-  border-bottom: 2px solid black;
-  /* & + & {
-    border-top: none;
-    border-right: none;
-  } */
+  border-right: var(--square-border);
+  border-bottom: var(--square-border);
 `;
 
 export interface ISmallSquareProps {
@@ -24,8 +19,11 @@ export const SmallSquare: React.FunctionComponent<ISmallSquareProps> = ({
 }) => {
   const { smallStoneNum, index } = square;
   return (
-    <SquareWrapper>
-      index: {index} / {smallStoneNum}
+    <SquareWrapper square={square}>
+      <div>index: {index}</div>
+      <h2>
+        <b>{smallStoneNum}</b>
+      </h2>
     </SquareWrapper>
   );
 };

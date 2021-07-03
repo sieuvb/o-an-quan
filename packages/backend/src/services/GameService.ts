@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import {
-  genSquareId,
+  getSquareId,
   IChessSquare,
   IGameState,
   INITIAL_SMALL_SQUARE_STONES,
@@ -14,6 +14,7 @@ import {
   MoveDirection,
   IGameStep,
   StepAction,
+  getPlayerIndexBySquareIndex,
 } from '@o-an-quan/shared';
 import { gameRepository } from '../repositories';
 import { TupleType } from 'typescript';
@@ -32,6 +33,7 @@ const initSquares = (
     let type = checkSquareIndexType(index, numOfSquaresPerPlayer);
     squares.push({
       index,
+      playerIndex: getPlayerIndexBySquareIndex(index),
       type,
       smallStoneNum:
         type == SquareType.BIG_SQUARE ? 0 : INITIAL_SMALL_SQUARE_STONES,
@@ -55,16 +57,20 @@ export class GameService {
 
     const initialGameState: IGameState = {
       players: [firstPlayerInfo],
-      currentTurn: 0,
+      currentTurn: 1,
       squares: initSquares(),
     };
 
     return initialGameState;
   };
 
-  createRoom = (playerid: string, playerInfo: Omit<IPlayer, 'id'>) => {
+  createRoom = (
+    playerid: string,
+    playerInfo: Omit<IPlayer, 'id' | 'index'>,
+  ) => {
     const firstPlayer: IPlayer = {
       id: playerid,
+      index: 1,
       ...playerInfo,
     };
     const room: IRoomInfo = {
@@ -84,7 +90,7 @@ export class GameService {
   joinRoom = (
     playerid: string,
     roomId: string,
-    playerInfo: Omit<IPlayer, 'id'>,
+    playerInfo: Omit<IPlayer, 'id' | 'index'>,
   ) => {
     const roomInfo = gameRepository.getRoomInfo(roomId);
     if (!roomInfo) {
@@ -98,6 +104,7 @@ export class GameService {
     const newPlayerInfo = {
       id: playerid,
       ...playerInfo,
+      index: 2,
       playerGameInfo: {
         bigStoneNum: 0,
         smallStoneNum: 0,
@@ -105,7 +112,7 @@ export class GameService {
       },
     };
     let newRoomInfo = gameRepository.addRoomPlayers(roomId, newPlayerInfo);
-    if (newRoomInfo.gameState.players.length > 2) {
+    if (newRoomInfo.gameState.players.length === 2) {
       newRoomInfo = gameRepository.updateRoomStatus(roomId, RoomStatus.PLAYING);
     }
     gameRepository.mapPlayerToRoom(playerid, roomInfo.id);
@@ -151,15 +158,12 @@ export class GameService {
     const currentTurn = game.gameState.currentTurn;
     const minIndex = currentTurn * 6;
     const maxIndex = currentTurn * 6 + 5;
-    const nextPlayerSquares = game.gameState.squares.slice(
-      minIndex,
-      maxIndex,
-    );
+    const nextPlayerSquares = game.gameState.squares.slice(minIndex, maxIndex);
     nextPlayerSquares[0].smallStoneNum;
     if (nextPlayerSquares.every(({ smallStoneNum }) => smallStoneNum == 0)) {
       gameRepository.takeSmallStoneFromPlayer(roomId, 5);
       for (let index = minIndex; index < maxIndex; index++) {
-        game.gameState.squares[index].smallStoneNum = 1
+        game.gameState.squares[index].smallStoneNum = 1;
         gameStep.steps.push({
           action: StepAction.REPUT,
           squareId: index,
@@ -196,7 +200,7 @@ export class GameService {
         action: StepAction.MOVE,
         squareId: selectedSquareIndex,
         smallStoneNum: 0,
-        bigStoneNum: 0
+        bigStoneNum: 0,
       });
 
       let currentIndex = selectedSquareIndex;

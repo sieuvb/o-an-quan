@@ -11,7 +11,6 @@ export const layoutStyles = css`
     var(--big-squares-width) + var(--small-square-wrapper-width)
   );
   --chess-board-height: var(--big-square-height);
-  --chess-board-bg: cornsilk;
-  --square-border-color: black;
-  --square-border-width: 1px;
+  --chess-board-bg: transparent;
+  --square-border: 2px solid #ccc;
 `;

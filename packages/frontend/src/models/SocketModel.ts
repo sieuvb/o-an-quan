@@ -30,6 +30,7 @@ export class SocketModel {
     this.socket.on(CREATE_ROOM_SUCCESS, this.handleCreateRoomSuccess);
     this.socket.on(JOIN_ROOM_SUCCESS, this.handleJoinRoomSuccess);
     this.socket.on(RELOAD_ROOM_SUCCESS, this.handleReloadRoomSuccess);
+    this.socket.on(USER_INPUT_STEP, this.handleInputStepResponse);
   }
 
   createRoom = (payload: ICreateGameRoomEventProps) => {
@@ -50,19 +51,24 @@ export class SocketModel {
 
   handleCreateRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
     const roomInfo = payload.data;
-    appModel.gameModel.initGame(roomInfo);
+    appModel.gameModel.initRoom(roomInfo);
     console.log('CREATE ROOM success', { payload });
   };
 
   handleJoinRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
     const roomInfo = payload.data;
-    appModel.gameModel.initGame(roomInfo);
+    appModel.gameModel.initRoom(roomInfo);
     console.log('JOIN ROOM success', { payload });
   };
 
   handleReloadRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {
     const roomInfo = payload.data;
-    appModel.gameModel.initGame(roomInfo);
+    appModel.gameModel.initRoom(roomInfo);
     console.log('RELOAD ROOM success', { payload });
+  };
+
+  handleInputStepResponse = (payload: ISocketResponsePayload<IRoomInfo>) => {
+    const roomInfo = payload.data;
+    appModel.gameModel.updateRoom(roomInfo);
   };
 }

@@ -5,6 +5,7 @@ import {
   ROOM_KEY,
 } from '@o-an-quan/shared';
 import isEmpty from 'lodash/isEmpty';
+import last from 'lodash/last';
 import { makeAutoObservable } from 'mobx';
 import { nanoid } from 'nanoid';
 
@@ -102,14 +103,18 @@ const MOCK_GAME_ROOM = {
 };
 
 export class GameModel {
-  roomInfo: IRoomInfo | null = MOCK_GAME_ROOM as IRoomInfo;
+  roomInfo: IRoomInfo | null = null;
   currPlayerId: string = sessionStorage.getItem(PLAYER_ID_KEY) || '';
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  initGame = (roomInfo: IRoomInfo) => {
+  initRoom = (roomInfo: IRoomInfo) => {
+    this.roomInfo = roomInfo;
+  };
+
+  updateRoom = (roomInfo: IRoomInfo) => {
     this.roomInfo = roomInfo;
   };
 
@@ -136,5 +141,13 @@ export class GameModel {
   get rivalPlayer() {
     const players = this.roomInfo?.gameState?.players || [];
     return players.find(({ id }) => id !== this.currPlayerId);
+  }
+
+  get currTurnSteps() {
+    const currTurn = this.roomInfo?.gameState.currentTurn || -1;
+    const currPlayerSteps = this.roomInfo?.gameState.players[currTurn]
+      .playerGameInfo.historySteps;
+    const lastMoveSteps = last(currPlayerSteps);
+    return lastMoveSteps;
   }
 }
