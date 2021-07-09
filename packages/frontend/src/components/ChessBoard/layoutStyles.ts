@@ -12,5 +12,6 @@ export const layoutStyles = css`
   );
   --chess-board-height: var(--big-square-height);
   --chess-board-bg: transparent;
-  --square-border: 2px solid #ccc;
+  --square-border: none;
+  --big-square-radius: 20px;
 `;

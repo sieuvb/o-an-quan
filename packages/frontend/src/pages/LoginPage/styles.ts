@@ -2,7 +2,11 @@ import styled from 'styled-components';
 
 export const ModalWrapper = styled.div`
   width: 600px;
-  background: white;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 1),
+    rgba(255, 255, 255, 0.6)
+  );
   border-radius: 4px;
   margin: auto;
   padding: 24px;

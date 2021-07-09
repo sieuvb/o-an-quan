@@ -1,5 +1,7 @@
 import {
+  getSquareId,
   IRoomInfo,
+  MoveDirection,
   PLAYER_ID_KEY,
   RoomStatus,
   ROOM_KEY,
@@ -8,6 +10,7 @@ import isEmpty from 'lodash/isEmpty';
 import last from 'lodash/last';
 import { makeAutoObservable } from 'mobx';
 import { nanoid } from 'nanoid';
+import { appModel } from './AppModel';
 
 const MOCK_GAME_ROOM = {
   id: 'EBRYdpExO2lZhfmLthhuo',
@@ -105,6 +108,8 @@ const MOCK_GAME_ROOM = {
 export class GameModel {
   roomInfo: IRoomInfo | null = null;
   currPlayerId: string = sessionStorage.getItem(PLAYER_ID_KEY) || '';
+  isPlayingAnimation: boolean = false;
+  animationCallback: () => void = () => {};
 
   constructor() {
     makeAutoObservable(this);
@@ -115,7 +120,18 @@ export class GameModel {
   };
 
   updateRoom = (roomInfo: IRoomInfo) => {
-    this.roomInfo = roomInfo;
+    this.playAnimation();
+    setTimeout(() => {
+      this.roomInfo = roomInfo;
+    }, 1000);
+  };
+
+  playAnimation = () => {
+    this.isPlayingAnimation = true;
+  };
+
+  stopAnimation = () => {
+    this.isPlayingAnimation = false;
   };
 
   genPlayerId = () => {
@@ -144,10 +160,42 @@ export class GameModel {
   }
 
   get currTurnSteps() {
-    const currTurn = this.roomInfo?.gameState.currentTurn || -1;
+    const currTurn = this.roomInfo?.gameState.currentTurn;
+    console.log(
+      'super',
+      JSON.parse(JSON.stringify({ currTurn, room: this.roomInfo })),
+    );
     const currPlayerSteps = this.roomInfo?.gameState.players[currTurn]
       .playerGameInfo.historySteps;
     const lastMoveSteps = last(currPlayerSteps);
     return lastMoveSteps;
   }
+
+  moveStep = (selectedSquareIndex: number, droppedSquareIndex: number) => {
+    const selectedSquareId = getSquareId(selectedSquareIndex);
+    const selectedSquareElm = document.getElementById(selectedSquareId);
+
+    const droppedSquareId = getSquareId(droppedSquareIndex);
+    const droppedSquareElm = document.getElementById(droppedSquareId);
+
+    if (!selectedSquareElm || !droppedSquareElm) {
+      throw new Error('Square not found!');
+    }
+
+    const moveDirection =
+      selectedSquareElm?.offsetLeft < droppedSquareElm?.offsetLeft
+        ? MoveDirection.CCW
+        : MoveDirection.CW;
+
+    const roomId = appModel.gameModel.roomInfo?.id;
+
+    if (!roomId) {
+      throw new Error('Room Id not found');
+    }
+    appModel.socketModel.inputStep({
+      roomId,
+      squareIndex: selectedSquareIndex,
+      moveDirection,
+    });
+  };
 }

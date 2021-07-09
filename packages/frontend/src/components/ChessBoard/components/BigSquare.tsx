@@ -9,16 +9,17 @@ const SquareWrapper = styled(DragSquare)<{ gridArea: any }>`
   height: var(--big-square-height);
   border: var(--square-border);
   grid-area: ${({ gridArea }) => gridArea};
+  background: var(--mirror-gradient-color);
 
   &.left-square {
-    border-top-left-radius: 1000px;
-    border-bottom-left-radius: 1000px;
+    border-top-left-radius: var(--big-square-radius);
+    border-bottom-left-radius: var(--big-square-radius);
     border-right: 0;
   }
 
   &.right-square {
-    border-top-right-radius: 1000px;
-    border-bottom-right-radius: 1000px;
+    border-top-right-radius: var(--big-square-radius);
+    border-bottom-right-radius: var(--big-square-radius);
     border-left: 0;
   }
 `;

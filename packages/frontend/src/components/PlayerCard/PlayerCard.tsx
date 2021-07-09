@@ -9,8 +9,11 @@ const CardWrapper = styled.div`
   display: grid;
   grid-row-gap: 8px;
   padding: 16px 36px;
-  background: white;
-  border: 1px solid #e6e6e6;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0.3)
+  );
   border-radius: 2px;
   margin: auto;
 `;

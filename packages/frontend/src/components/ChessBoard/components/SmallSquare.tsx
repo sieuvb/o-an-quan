@@ -8,6 +8,7 @@ const SquareWrapper = styled(DragSquare)`
   height: var(--small-square-size);
   border-right: var(--square-border);
   border-bottom: var(--square-border);
+  background: var(--mirror-gradient-color);
 `;
 
 export interface ISmallSquareProps {

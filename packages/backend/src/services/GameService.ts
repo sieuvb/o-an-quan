@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid';
 import {
-  getSquareId,
   IChessSquare,
   IGameState,
   INITIAL_SMALL_SQUARE_STONES,
@@ -166,7 +165,7 @@ export class GameService {
         game.gameState.squares[index].smallStoneNum = 1;
         gameStep.steps.push({
           action: StepAction.REPUT,
-          squareId: index,
+          squareIndex: index,
           smallStoneNum: 1,
           bigStoneNum: 0,
         });
@@ -215,8 +214,8 @@ export class GameService {
         calculatedSquares[nextIndex].smallStoneNum++;
 
         gameStep.steps.push({
-          action: StepAction.REPUT,
-          squareId: nextIndex,
+          action: StepAction.MOVE,
+          squareIndex: nextIndex,
           smallStoneNum: calculatedSquares[nextIndex].smallStoneNum,
           bigStoneNum: calculatedSquares[nextIndex].bigStoneNum,
         });
@@ -269,7 +268,7 @@ export class GameService {
 
               gameStep.steps.push({
                 action: StepAction.TAKE,
-                squareId: next2Index,
+                squareIndex: next2Index,
                 smallStoneNum: next2Square.smallStoneNum,
                 bigStoneNum: next2Square.bigStoneNum,
               });

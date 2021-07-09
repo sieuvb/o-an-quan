@@ -6,12 +6,20 @@ import { observer } from 'mobx-react-lite';
 import { appModel } from 'models';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { BigSquareType, IGameState, PLAYER_SQUARES } from '@o-an-quan/shared';
-import { BigSquare, SmallSquare, DragLayer } from './components';
+import {
+  BigSquareType,
+  IChessSquare,
+  IGameState,
+  PLAYER_SQUARES,
+} from '@o-an-quan/shared';
+import { BigSquare, SmallSquare, ChessBoardCursor } from './components';
 import { layoutStyles } from './layoutStyles';
+import { ChessBoardViewModel } from './ChessBoardViewModel';
+import { useViewModel } from 'utils';
 
 export const BoardWrapper = styled.div`
   ${layoutStyles};
+  position: relative;
   display: grid;
   grid-template-areas:
     'l-big-square small-squares r-big-square'
@@ -23,7 +31,7 @@ export const BoardWrapper = styled.div`
   text-align: center;
   width: var(--chess-board-width);
   height: var(--chess-board-height);
-  background: cornsilk;
+  background: var(--chess-board-bg);
 `;
 
 const SmallSquaresWrapper = styled.div`
@@ -41,61 +49,45 @@ const SmallSquaresRow = styled.div<{
   flex-direction: ${({ isReversed }) => (isReversed ? 'row-reverse' : 'row')};
 `;
 
-export interface IChessBoardProps {
-  gameState: IGameState;
-}
+export interface IChessBoardProps {}
 
-export const ChessBoard: React.FC<IChessBoardProps> = observer(
-  ({ gameState }) => {
-    const { currPlayer, rivalPlayer } = appModel.gameModel;
-    if (!currPlayer || !rivalPlayer) {
-      return null;
-    }
-    const { squares = [], currentTurn } = gameState;
-    const currPlayerSquares = sortBy(
-      squares.filter(({ index }) =>
-        PLAYER_SQUARES[currPlayer.index].includes(index),
-      ),
-      'index',
-    );
-    const rivalPlayerSquares = sortBy(
-      squares.filter(({ index }) =>
-        PLAYER_SQUARES[rivalPlayer.index].includes(index),
-      ),
-      'index',
-    );
-    const leftBigSquareIndex = (last(rivalPlayerSquares)?.index || 0) + 1;
-    const rightBigSquareIndex = (last(currPlayerSquares)?.index || 0) + 1;
-    const leftBigSquare = squares.find(
-      ({ index }) => index === leftBigSquareIndex,
-    );
-    const rightBigSquare = squares.find(
-      ({ index }) => index === rightBigSquareIndex,
-    );
-    if (!leftBigSquare || !rightBigSquare) {
-      return null;
-    }
+export const ChessBoard: React.FC<IChessBoardProps> = observer(() => {
+  const chessboardViewModel = useViewModel(ChessBoardViewModel);
+  const {
+    iCurrPlayerSquares,
+    iRivalPlayerSquares,
+    iLeftBigSquare,
+    iRightBigSquare,
+  } = chessboardViewModel;
 
-    return (
-      <DndProvider backend={HTML5Backend}>
-        {/* <DragLayer /> */}
-        <BoardWrapper>
-          <BigSquare square={leftBigSquare} type={BigSquareType.LEFT} />
-          <SmallSquaresWrapper>
-            <SmallSquaresRow isReversed>
-              {rivalPlayerSquares.map((square) => (
-                <SmallSquare key={square.index} square={square} {...square} />
-              ))}
-            </SmallSquaresRow>
-            <SmallSquaresRow>
-              {currPlayerSquares.map((square) => (
-                <SmallSquare key={square.index} square={square} {...square} />
-              ))}
-            </SmallSquaresRow>
-          </SmallSquaresWrapper>
-          <BigSquare square={rightBigSquare} type={BigSquareType.RIGHT} />
-        </BoardWrapper>
-      </DndProvider>
-    );
-  },
-);
+  if (
+    !iLeftBigSquare ||
+    !iRightBigSquare ||
+    !iCurrPlayerSquares ||
+    !iRivalPlayerSquares
+  ) {
+    return null;
+  }
+
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <BoardWrapper>
+        <ChessBoardCursor chessboardViewModel={chessboardViewModel} />
+        <BigSquare square={iLeftBigSquare} type={BigSquareType.LEFT} />
+        <SmallSquaresWrapper>
+          <SmallSquaresRow isReversed>
+            {iRivalPlayerSquares.map((square) => (
+              <SmallSquare key={square.index} square={square} {...square} />
+            ))}
+          </SmallSquaresRow>
+          <SmallSquaresRow>
+            {iCurrPlayerSquares.map((square) => (
+              <SmallSquare key={square.index} square={square} {...square} />
+            ))}
+          </SmallSquaresRow>
+        </SmallSquaresWrapper>
+        <BigSquare square={iRightBigSquare} type={BigSquareType.RIGHT} />
+      </BoardWrapper>
+    </DndProvider>
+  );
+});

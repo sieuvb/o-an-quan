@@ -1,8 +1,24 @@
 import { autorun, makeAutoObservable, reaction } from 'mobx';
-import { getSquareId, MoveDirection } from '@o-an-quan/shared';
+import sortBy from 'lodash/sortBy';
+import last from 'lodash/last';
+import {
+  getSquareId,
+  IChessSquare,
+  MoveDirection,
+  PLAYER_SQUARES,
+} from '@o-an-quan/shared';
 import { appModel } from 'models';
 
 export class ChessBoardViewModel {
+  iCurrPlayerSquares: IChessSquare[] = [];
+  iRivalPlayerSquares: IChessSquare[] = [];
+  iLeftBigSquare: IChessSquare = null;
+  iRightBigSquare: IChessSquare = null;
+  animationCursorPosition = {
+    top: 0,
+    left: 0,
+  };
+
   constructor() {
     makeAutoObservable(this);
     autorun(() => {
@@ -10,41 +26,112 @@ export class ChessBoardViewModel {
         'super',
         JSON.parse(
           JSON.stringify({
-            game: appModel.gameModel.roomInfo,
-            currSteps: appModel.gameModel.currTurnSteps,
+            game: appModel.gameModel?.roomInfo,
+            currSteps: appModel.gameModel?.currTurnSteps,
           }),
         ),
       );
     });
+
+    reaction(
+      () => ({
+        isPlayingAnimation: appModel.gameModel.isPlayingAnimation,
+        roomInfo: appModel.gameModel.roomInfo,
+      }),
+      ({ isPlayingAnimation, roomInfo }, prevProps) => {
+        if (roomInfo && roomInfo.gameState) {
+          if (isPlayingAnimation) {
+            if (prevProps?.isPlayingAnimation !== isPlayingAnimation) {
+              this.triggerMoveAnimation();
+            }
+          } else {
+            this.updateBoardStates();
+          }
+        }
+      },
+      { fireImmediately: true },
+    );
   }
 
-  moveStep = (selectedSquareIndex: number, droppedSquareIndex: number) => {
-    const selectedSquareId = getSquareId(selectedSquareIndex);
-    const selectedSquareElm = document.getElementById(selectedSquareId);
-
-    const droppedSquareId = getSquareId(droppedSquareIndex);
-    const droppedSquareElm = document.getElementById(droppedSquareId);
-
-    if (!selectedSquareElm || !droppedSquareElm) {
-      throw new Error('Square not found!');
+  get currPlayerSquares() {
+    const { currPlayer, roomInfo } = appModel.gameModel;
+    if (!roomInfo || !roomInfo.gameState || !currPlayer) {
+      return null;
     }
+    const {
+      gameState: { squares },
+    } = roomInfo;
+    return sortBy(
+      squares.filter(({ index }) =>
+        PLAYER_SQUARES[currPlayer.index].includes(index),
+      ),
+      'index',
+    );
+  }
 
-    const moveDirection =
-      selectedSquareElm?.offsetLeft < droppedSquareElm?.offsetLeft
-        ? MoveDirection.CCW
-        : MoveDirection.CW;
-
-    const roomId = appModel.gameModel.roomInfo?.id;
-
-    if (!roomId) {
-      throw new Error('Room Id not found');
+  get rivalPlayerSquares() {
+    const { rivalPlayer, roomInfo } = appModel.gameModel;
+    if (!roomInfo || !roomInfo.gameState || !rivalPlayer) {
+      return null;
     }
-    appModel.socketModel.inputStep({
-      roomId,
-      squareIndex: selectedSquareIndex,
-      moveDirection,
+    const {
+      gameState: { squares },
+    } = roomInfo;
+    return sortBy(
+      squares.filter(({ index }) =>
+        PLAYER_SQUARES[rivalPlayer.index].includes(index),
+      ),
+      'index',
+    );
+  }
+
+  get leftBigSquare() {
+    const { roomInfo } = appModel.gameModel;
+    if (!roomInfo || !roomInfo.gameState) {
+      return null;
+    }
+    const {
+      gameState: { squares },
+    } = roomInfo;
+    const leftBigSquareIndex = (last(this.rivalPlayerSquares)?.index || 0) + 1;
+    return squares.find(({ index }) => index === leftBigSquareIndex);
+  }
+
+  get rightBigSquare() {
+    const { roomInfo } = appModel.gameModel;
+    if (!roomInfo || !roomInfo.gameState) {
+      return null;
+    }
+    const {
+      gameState: { squares },
+    } = roomInfo;
+    const rightBigSquareIndex = (last(this.currPlayerSquares)?.index || 0) + 1;
+    return squares.find(({ index }) => index === rightBigSquareIndex);
+  }
+
+  updateBoardStates = () => {
+    this.iCurrPlayerSquares = this.currPlayerSquares;
+    this.iRivalPlayerSquares = this.rivalPlayerSquares;
+    this.iLeftBigSquare = this.leftBigSquare;
+    this.iRightBigSquare = this.rightBigSquare;
+  };
+
+  triggerMoveAnimation = () => {
+    const currTurnMove = appModel.gameModel.currTurnSteps;
+    const { moveDirection, squareIndex, steps } = currTurnMove;
+    this.processStepsAnimation(steps);
+  };
+
+  processStepsAnimation = (steps: any[] = []) => {
+    steps.forEach(({ action, squareIndex, smallStoneNum, bigStoneNum }) => {
+      setTimeout(() => {
+        const squareId = getSquareId(squareIndex);
+        const squareElm = document.querySelector(`#${squareId}`);
+        this.animationCursorPosition = {
+          top: squareElm.getBoundingClientRect().top,
+          left: squareElm.getBoundingClientRect().left,
+        };
+      }, 1000);
     });
   };
 }
-
-export const chessboardViewModel = new ChessBoardViewModel();

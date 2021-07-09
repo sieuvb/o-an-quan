@@ -18,7 +18,7 @@ export const GamePage = observer(() => {
   return (
     <PageWrapper>
       <PlayerCard player={rivalPlayer} />
-      {roomInfo?.gameState && <ChessBoard gameState={roomInfo.gameState} />}
+      {roomInfo?.gameState && <ChessBoard />}
       <PlayerCard player={currPlayer} isCurrPlayer />
       {isShowRoomLink && (
         <GameSharingLink className="link-sharing" link={gameSharingLink} />
