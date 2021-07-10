@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { IChessSquare } from '@o-an-quan/shared';
 import { DragSquare } from './DragSquare';
+import { ChessBoardViewModel } from '../ChessBoardViewModel';
 
 const SquareWrapper = styled(DragSquare)`
   width: var(--small-square-size);
@@ -13,14 +14,16 @@ const SquareWrapper = styled(DragSquare)`
 
 export interface ISmallSquareProps {
   square: IChessSquare;
+  chessboardViewModel: ChessBoardViewModel;
 }
 
 export const SmallSquare: React.FunctionComponent<ISmallSquareProps> = ({
   square,
+  chessboardViewModel,
 }) => {
   const { smallStoneNum, index } = square;
   return (
-    <SquareWrapper square={square}>
+    <SquareWrapper square={square} chessboardViewModel={chessboardViewModel}>
       <div>index: {index}</div>
       <h2>
         <b>{smallStoneNum}</b>

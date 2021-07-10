@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import classnames from 'classnames';
 import { BigSquareType, IChessSquare } from '@o-an-quan/shared';
 import { DragSquare } from './DragSquare';
+import { ChessBoardViewModel } from '../ChessBoardViewModel';
 
 const SquareWrapper = styled(DragSquare)<{ gridArea: any }>`
   width: var(--big-square-width);
@@ -27,13 +28,14 @@ const SquareWrapper = styled(DragSquare)<{ gridArea: any }>`
 export interface IBigSquareProps {
   square: IChessSquare;
   type: BigSquareType;
+  chessboardViewModel: ChessBoardViewModel;
 }
 
 export const BigSquare: React.FunctionComponent<IBigSquareProps> = ({
   square,
   type,
+  chessboardViewModel,
 }) => {
-  const { smallStoneNum, bigStoneNum, index } = square;
   const gridArea =
     type === BigSquareType.LEFT ? 'l-big-square' : 'r-big-square';
   return (
@@ -44,6 +46,7 @@ export const BigSquare: React.FunctionComponent<IBigSquareProps> = ({
       })}
       gridArea={gridArea}
       square={square}
+      chessboardViewModel={chessboardViewModel}
     />
   );
 };

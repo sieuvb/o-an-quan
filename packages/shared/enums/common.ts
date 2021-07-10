@@ -25,7 +25,7 @@ export enum SocketResponseStatus {
 }
 
 export enum StepAction {
-  START = 'START',
+  PICK = 'PICK',
   MOVE = 'MOVE',
   TAKE = 'TAKE',
   REPUT = 'REPUT',

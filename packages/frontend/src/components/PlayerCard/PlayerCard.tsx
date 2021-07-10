@@ -3,10 +3,11 @@ import classnames from 'classnames';
 import styled from 'styled-components';
 import { Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { IPlayer } from '../../../../shared';
+import { IPlayer } from '@o-an-quan/shared';
 
 const CardWrapper = styled.div`
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-row-gap: 8px;
   padding: 16px 36px;
   background: linear-gradient(
@@ -14,7 +15,7 @@ const CardWrapper = styled.div`
     rgba(255, 255, 255, 0.7),
     rgba(255, 255, 255, 0.3)
   );
-  width: 180px;
+  width: 168px;
   border-radius: 2px;
   margin: auto;
 `;

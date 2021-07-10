@@ -115,31 +115,6 @@ export class GameModel {
     makeAutoObservable(this);
   }
 
-  initRoom = (roomInfo: IRoomInfo) => {
-    this.roomInfo = roomInfo;
-  };
-
-  updateRoom = (roomInfo: IRoomInfo) => {
-    this.playAnimation();
-    setTimeout(() => {
-      this.roomInfo = roomInfo;
-    }, 1000);
-  };
-
-  playAnimation = () => {
-    this.isPlayingAnimation = true;
-  };
-
-  stopAnimation = () => {
-    this.isPlayingAnimation = false;
-  };
-
-  genPlayerId = () => {
-    const playerId = nanoid();
-    this.currPlayerId = playerId;
-    sessionStorage.setItem(PLAYER_ID_KEY, playerId);
-  };
-
   get isRoomOwner() {
     return this.currPlayerId === this.roomInfo?.id;
   }
@@ -171,7 +146,62 @@ export class GameModel {
     return lastMoveSteps;
   }
 
+  get isCurrPlayerTurn() {
+    return this.currPlayer.index === this.roomInfo.gameState.currentTurn;
+  }
+
+  get isAllowInteract() {
+    return this.isCurrPlayerTurn && !this.isPlayingAnimation;
+  }
+
+  initRoom = (roomInfo: IRoomInfo) => {
+    this.roomInfo = roomInfo;
+  };
+
+  updateRoom = (roomInfo: IRoomInfo) => {
+    this.roomInfo = roomInfo;
+    this.playAnimation();
+  };
+
+  playAnimation = () => {
+    this.isPlayingAnimation = true;
+  };
+
+  stopAnimation = () => {
+    this.isPlayingAnimation = false;
+  };
+
+  genPlayerId = () => {
+    const playerId = nanoid();
+    this.currPlayerId = playerId;
+    sessionStorage.setItem(PLAYER_ID_KEY, playerId);
+  };
+
+  checkIfSquareBelongCurrPlayer = (squareIndex: number) => {
+    const currSquare = this.roomInfo.gameState.squares[squareIndex];
+    return currSquare?.playerIndex === this.currPlayer.index;
+  };
+
+  checkValidStep = (
+    selectedSquareIndex: number,
+    droppedSquareIndex: number,
+  ) => {
+    const isAdjacentSquares =
+      Math.abs(selectedSquareIndex - droppedSquareIndex) === 1;
+    const isValidSquares =
+      this.checkIfSquareBelongCurrPlayer(selectedSquareIndex) &&
+      isAdjacentSquares;
+    const canMoveStep =
+      this.isAllowInteract &&
+      isValidSquares &&
+      selectedSquareIndex !== droppedSquareIndex;
+
+    return canMoveStep;
+  };
+
   moveStep = (selectedSquareIndex: number, droppedSquareIndex: number) => {
+    // const res = this.checkValidStep(selectedSquareIndex, droppedSquareIndex);
+    // if (!res) return;
     const selectedSquareId = getSquareId(selectedSquareIndex);
     const selectedSquareElm = document.getElementById(selectedSquareId);
 

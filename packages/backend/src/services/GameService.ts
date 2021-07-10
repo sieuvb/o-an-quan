@@ -155,13 +155,12 @@ export class GameService {
 
     // Check other player turn if empty
     const currentTurn = game.gameState.currentTurn;
-    const minIndex = currentTurn * 6;
-    const maxIndex = currentTurn * 6 + 5;
-    const nextPlayerSquares = game.gameState.squares.slice(minIndex, maxIndex);
-    nextPlayerSquares[0].smallStoneNum;
-    if (nextPlayerSquares.every(({ smallStoneNum }) => smallStoneNum == 0)) {
+    const nextPlayerSquares = game.gameState.squares.filter(
+      ({ playerIndex }) => playerIndex === currentTurn,
+    );
+    if (nextPlayerSquares.every(({ smallStoneNum }) => smallStoneNum === 0)) {
       gameRepository.takeSmallStoneFromPlayer(roomId, 5);
-      for (let index = minIndex; index < maxIndex; index++) {
+      nextPlayerSquares.forEach((_, index) => {
         game.gameState.squares[index].smallStoneNum = 1;
         gameStep.steps.push({
           action: StepAction.REPUT,
@@ -169,7 +168,7 @@ export class GameService {
           smallStoneNum: 1,
           bigStoneNum: 0,
         });
-      }
+      });
     }
 
     game = gameRepository.inputPlayerStep(roomId, resultGameStep);
@@ -188,20 +187,20 @@ export class GameService {
 
     let selectedSquareIndex = gameStep.squareIndex;
     let directionIndex = gameStep.moveDirection === MoveDirection.CW ? -1 : 1;
+
     while (!end_loop) {
       // Get the number of stones in the selected square
       let numOfStonesSelected =
         calculatedSquares[selectedSquareIndex].smallStoneNum;
-
-      // Pick up all the stones in the selected square
-      calculatedSquares[selectedSquareIndex].smallStoneNum = 0;
       gameStep.steps.push({
-        action: StepAction.START,
+        action: StepAction.PICK,
         squareIndex: selectedSquareIndex,
         smallStoneNum: 0,
         bigStoneNum: 0,
         numOfStonesSelected,
       });
+      // Pick up all the stones in the selected square
+      calculatedSquares[selectedSquareIndex].smallStoneNum = 0;
 
       let currentIndex = selectedSquareIndex;
 
@@ -231,12 +230,12 @@ export class GameService {
           this.getNextIndex(currentIndex, directionIndex, currentSquares.length)
         ];
       // Break if Big Square
-      if (nextSquare.type == SquareType.BIG_SQUARE) {
+      if (nextSquare.type === SquareType.BIG_SQUARE) {
         console.log('Stopped due to BIG SQUARE');
         break;
       }
       // Break if 2-squares-blank
-      if (nextSquare.smallStoneNum == 0 && nextSquare.bigStoneNum == 0) {
+      if (nextSquare.smallStoneNum === 0 && nextSquare.bigStoneNum === 0) {
         let next2Index = this.getNextIndex(
           this.getNextIndex(
             currentIndex,
@@ -249,7 +248,7 @@ export class GameService {
 
         let next2Square = calculatedSquares[next2Index];
         let nextIndex;
-        if (next2Square.smallStoneNum == 0 && next2Square.bigStoneNum == 0) {
+        if (next2Square.smallStoneNum === 0 && next2Square.bigStoneNum === 0) {
           console.log('Stopped due to 2 blank squares');
           break;
         } else {
@@ -313,11 +312,11 @@ export class GameService {
     squaresLenght: number,
   ): number => {
     if (directionIndex == -1 && currentIndex == 0) {
-      return (currentIndex = squaresLenght - 1);
+      return squaresLenght - 1;
     } else if (directionIndex == 1 && currentIndex == squaresLenght - 1) {
-      return (currentIndex = 0);
+      return 0;
     } else {
-      return (currentIndex = currentIndex + directionIndex);
+      return currentIndex + directionIndex;
     }
   };
 

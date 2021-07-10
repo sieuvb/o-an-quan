@@ -11,6 +11,7 @@ import {
   IChessSquare,
   IGameState,
   PLAYER_SQUARES,
+  RoomStatus,
 } from '@o-an-quan/shared';
 import { BigSquare, SmallSquare, ChessBoardCursor } from './components';
 import { layoutStyles } from './layoutStyles';
@@ -73,20 +74,38 @@ export const ChessBoard: React.FC<IChessBoardProps> = observer(() => {
     <DndProvider backend={HTML5Backend}>
       <BoardWrapper>
         <ChessBoardCursor chessboardViewModel={chessboardViewModel} />
-        <BigSquare square={iLeftBigSquare} type={BigSquareType.LEFT} />
+        <BigSquare
+          chessboardViewModel={chessboardViewModel}
+          square={iLeftBigSquare}
+          type={BigSquareType.LEFT}
+        />
         <SmallSquaresWrapper>
           <SmallSquaresRow isReversed>
             {iRivalPlayerSquares.map((square) => (
-              <SmallSquare key={square.index} square={square} {...square} />
+              <SmallSquare
+                key={square.index}
+                square={square}
+                chessboardViewModel={chessboardViewModel}
+                {...square}
+              />
             ))}
           </SmallSquaresRow>
           <SmallSquaresRow>
             {iCurrPlayerSquares.map((square) => (
-              <SmallSquare key={square.index} square={square} {...square} />
+              <SmallSquare
+                key={square.index}
+                square={square}
+                chessboardViewModel={chessboardViewModel}
+                {...square}
+              />
             ))}
           </SmallSquaresRow>
         </SmallSquaresWrapper>
-        <BigSquare square={iRightBigSquare} type={BigSquareType.RIGHT} />
+        <BigSquare
+          chessboardViewModel={chessboardViewModel}
+          square={iRightBigSquare}
+          type={BigSquareType.RIGHT}
+        />
       </BoardWrapper>
     </DndProvider>
   );

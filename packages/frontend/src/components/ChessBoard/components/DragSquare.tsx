@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import throttle from 'lodash/throttle';
 import classnames from 'classnames';
 import { DragPreviewImage, useDrag, useDragLayer, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -8,10 +9,12 @@ import { getSquareId, IChessSquare, SquareType } from '@o-an-quan/shared';
 import smallStonesImg from 'assests/images/small-stones.png';
 import { SQUARE_TYPE } from '../constants';
 import { StonesRender } from './StonesRender';
+import { ChessBoardViewModel } from '../ChessBoardViewModel';
 
 interface IDragSquareProps {
   className?: string;
   square: IChessSquare;
+  chessboardViewModel: ChessBoardViewModel;
 }
 
 const DragDropWrapper = styled.div`
@@ -35,9 +38,26 @@ const DragDropWrapper = styled.div`
     opacity: 0.5;
   }
 
+  &.valid {
+    background: linear-gradient(
+      to right bottom,
+      rgba(255, 255, 255, 0.5),
+      #32cd32
+    );
+    opacity: 1;
+  }
+
   &.over {
-    background: #e6f7ff;
     z-index: 2;
+    opacity: 0.5;
+    &.valid {
+      background: linear-gradient(
+        to right bottom,
+        rgba(255, 255, 255, 0.5),
+        #00f9ff
+      );
+      opacity: 1;
+    }
   }
 `;
 
@@ -85,16 +105,36 @@ const SquareContent = styled.div`
 export const DragSquare: React.FC<IDragSquareProps> = ({
   className,
   square,
+  chessboardViewModel,
 }) => {
+  const { isAllowInteract, currPlayer, checkValidStep } = appModel.gameModel;
+  const { setDraggingSquareIndex, draggingSquareIndex } = chessboardViewModel;
+  const canDragChecker = React.useCallback(
+    throttle(
+      () => isAllowInteract && square.playerIndex === currPlayer.index,
+      300,
+    ),
+    [],
+  );
+  const canDropChecker = React.useCallback(
+    throttle(
+      (draggingItem: IChessSquare) =>
+        checkValidStep(draggingItem.index, square.index),
+      300,
+    ),
+    [],
+  );
   const [{ isDragging }, dragRef, preview] = useDrag<any, any, any>({
     type: SQUARE_TYPE,
     item: square,
+    canDrag: canDragChecker,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
   const [{ canDrop, isOver }, dropRef] = useDrop<any, any, any>(() => ({
     accept: SQUARE_TYPE,
+    canDrop: canDropChecker,
     drop: (draggingItem: IChessSquare) => {
       appModel.gameModel.moveStep(draggingItem.index, square.index);
     },
@@ -104,7 +144,13 @@ export const DragSquare: React.FC<IDragSquareProps> = ({
     }),
   }));
 
-  const { bigStoneNum, smallStoneNum, index, type } = square;
+  React.useEffect(() => {
+    if (isDragging) {
+      setDraggingSquareIndex(square.index);
+    }
+  }, [isDragging, square.index, setDraggingSquareIndex]);
+
+  const { bigStoneNum, smallStoneNum, index } = square;
   return (
     <DragDropWrapper
       id={getSquareId(index)}
@@ -112,6 +158,7 @@ export const DragSquare: React.FC<IDragSquareProps> = ({
       className={classnames(
         {
           dragging: isDragging,
+          valid: canDrop,
           over: isOver,
         },
         className,

@@ -18,7 +18,9 @@ export class ChessBoardViewModel {
   iRivalPlayerSquares: IChessSquare[] = [];
   iLeftBigSquare: IChessSquare = null;
   iRightBigSquare: IChessSquare = null;
+  iRoomStatus: RoomStatus = null;
   animationCursorPayload: ICursorPayload = null;
+  draggingSquareIndex: number = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -40,7 +42,10 @@ export class ChessBoardViewModel {
         roomInfo: appModel.gameModel.roomInfo,
       }),
       ({ isBoardEmpty, roomInfo }) => {
-        if (roomInfo.status === RoomStatus.PLAYING && isBoardEmpty) {
+        if (
+          roomInfo.status !== RoomStatus.WAITING_FOR_PLAYERS &&
+          isBoardEmpty
+        ) {
           this.updateBoardStates();
         }
       },
@@ -54,7 +59,7 @@ export class ChessBoardViewModel {
       }),
       ({ isPlayingAnimation, currTurnSteps }, prevProps) => {
         if (!isEmpty(currTurnSteps)) {
-          if (isPlayingAnimation) {
+          if (isPlayingAnimation && !prevProps.isPlayingAnimation) {
             this.triggerMoveAnimation();
           } else {
             this.updateBoardStates();
@@ -134,6 +139,12 @@ export class ChessBoardViewModel {
     this.iRivalPlayerSquares = this.rivalPlayerSquares;
     this.iLeftBigSquare = this.leftBigSquare;
     this.iRightBigSquare = this.rightBigSquare;
+    this.iRoomStatus = appModel.gameModel.roomInfo.status;
+
+    //TODO: Remove later
+    if (this.iRoomStatus) {
+      alert('Game finished');
+    }
   };
 
   triggerMoveAnimation = async () => {
@@ -163,7 +174,6 @@ export class ChessBoardViewModel {
       } = step;
       const squareId = getSquareId(squareIndex);
       const squareElm = document.querySelector(`#${squareId}`);
-      console.log('super processStepsAnimation', { squareId });
       this.animationCursorPayload = {
         top: squareElm.getBoundingClientRect().top,
         left: squareElm.getBoundingClientRect().left,
@@ -176,11 +186,16 @@ export class ChessBoardViewModel {
         'super processStepsAnimation',
         JSON.parse(
           JSON.stringify({
+            squareId,
             animationCursorPayload: this.animationCursorPayload,
           }),
         ),
       );
       await new Promise((resolve) => setTimeout(resolve, 600));
     }
+  };
+
+  setDraggingSquareIndex = (squareIndex: number) => {
+    this.draggingSquareIndex = squareIndex;
   };
 }
