@@ -9,19 +9,19 @@ export const checkSquareIndexType = (
   index: number,
   numOfSquaresPerPlayer: number = 5,
 ): SquareType => {
-  if ((index + 1) % (numOfSquaresPerPlayer + 1) == 0) {
+  if ([5, 11].includes(index)) {
     return SquareType.BIG_SQUARE;
   }
   return SquareType.SMALL_SQUARE;
 };
 
 export const getPlayerIndexBySquareIndex = (squareIndex: number) => {
-  if (PLAYER_SQUARES[1].includes(squareIndex)) {
-    return 1;
+  if (PLAYER_SQUARES[0].includes(squareIndex)) {
+    return 0;
   }
 
-  if (PLAYER_SQUARES[2].includes(squareIndex)) {
-    return 2;
+  if (PLAYER_SQUARES[1].includes(squareIndex)) {
+    return 1;
   }
 
   return undefined;

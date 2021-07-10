@@ -160,13 +160,13 @@ export class GameModel {
   }
 
   get currTurnSteps() {
-    const currTurn = this.roomInfo?.gameState.currentTurn;
+    const currTurn = this.roomInfo?.gameState?.currentTurn;
     console.log(
       'super',
       JSON.parse(JSON.stringify({ currTurn, room: this.roomInfo })),
     );
     const currPlayerSteps = this.roomInfo?.gameState.players[currTurn]
-      .playerGameInfo.historySteps;
+      ?.playerGameInfo?.historySteps;
     const lastMoveSteps = last(currPlayerSteps);
     return lastMoveSteps;
   }
@@ -195,6 +195,11 @@ export class GameModel {
     appModel.socketModel.inputStep({
       roomId,
       squareIndex: selectedSquareIndex,
+      moveDirection,
+    });
+    console.log('super input', {
+      selectedSquareIndex,
+      droppedSquareIndex,
       moveDirection,
     });
   };

@@ -7,7 +7,6 @@ import {
   IPlayer,
   IRoomInfo,
   RoomStatus,
-  SquareIndex,
   SquareType,
   checkSquareIndexType,
   MoveDirection,
@@ -47,6 +46,7 @@ export class GameService {
   initGame = (firstPlayer: IPlayer) => {
     const firstPlayerInfo: IPlayer = {
       ...firstPlayer,
+      index: 0,
       playerGameInfo: {
         bigStoneNum: 0,
         smallStoneNum: 0,
@@ -56,7 +56,7 @@ export class GameService {
 
     const initialGameState: IGameState = {
       players: [firstPlayerInfo],
-      currentTurn: 1,
+      currentTurn: 0,
       squares: initSquares(),
     };
 
@@ -69,7 +69,7 @@ export class GameService {
   ) => {
     const firstPlayer: IPlayer = {
       id: playerid,
-      index: 1,
+      index: 0,
       ...playerInfo,
     };
     const room: IRoomInfo = {
@@ -100,10 +100,10 @@ export class GameService {
       throw 'Invalid room status';
     }
 
-    const newPlayerInfo = {
+    const newPlayerInfo: IPlayer = {
       id: playerid,
       ...playerInfo,
-      index: 2,
+      index: 1,
       playerGameInfo: {
         bigStoneNum: 0,
         smallStoneNum: 0,
@@ -187,7 +187,7 @@ export class GameService {
     let calculatedSquares = currentSquares;
 
     let selectedSquareIndex = gameStep.squareIndex;
-    let directionIndex = gameStep.moveDirection == MoveDirection.CW ? -1 : 1;
+    let directionIndex = gameStep.moveDirection === MoveDirection.CW ? -1 : 1;
     while (!end_loop) {
       // Get the number of stones in the selected square
       let numOfStonesSelected =
@@ -196,10 +196,11 @@ export class GameService {
       // Pick up all the stones in the selected square
       calculatedSquares[selectedSquareIndex].smallStoneNum = 0;
       gameStep.steps.push({
-        action: StepAction.MOVE,
-        squareId: selectedSquareIndex,
+        action: StepAction.START,
+        squareIndex: selectedSquareIndex,
         smallStoneNum: 0,
         bigStoneNum: 0,
+        numOfStonesSelected,
       });
 
       let currentIndex = selectedSquareIndex;
@@ -218,6 +219,7 @@ export class GameService {
           squareIndex: nextIndex,
           smallStoneNum: calculatedSquares[nextIndex].smallStoneNum,
           bigStoneNum: calculatedSquares[nextIndex].bigStoneNum,
+          numOfStonesSelected,
         });
 
         currentIndex = nextIndex;
@@ -271,6 +273,7 @@ export class GameService {
                 squareIndex: next2Index,
                 smallStoneNum: next2Square.smallStoneNum,
                 bigStoneNum: next2Square.bigStoneNum,
+                numOfStonesSelected,
               });
             } else {
               end_taking_loop = true;

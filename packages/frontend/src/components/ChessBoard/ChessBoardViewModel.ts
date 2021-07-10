@@ -1,11 +1,15 @@
 import { autorun, makeAutoObservable, reaction } from 'mobx';
 import sortBy from 'lodash/sortBy';
 import last from 'lodash/last';
+import isEmpty from 'lodash/isEmpty';
 import {
   getSquareId,
   IChessSquare,
+  ICursorPayload,
+  IMoveStep,
   MoveDirection,
   PLAYER_SQUARES,
+  RoomStatus,
 } from '@o-an-quan/shared';
 import { appModel } from 'models';
 
@@ -14,10 +18,7 @@ export class ChessBoardViewModel {
   iRivalPlayerSquares: IChessSquare[] = [];
   iLeftBigSquare: IChessSquare = null;
   iRightBigSquare: IChessSquare = null;
-  animationCursorPosition = {
-    top: 0,
-    left: 0,
-  };
+  animationCursorPayload: ICursorPayload = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -35,22 +36,41 @@ export class ChessBoardViewModel {
 
     reaction(
       () => ({
-        isPlayingAnimation: appModel.gameModel.isPlayingAnimation,
+        isBoardEmpty: this.isBoardEmpty,
         roomInfo: appModel.gameModel.roomInfo,
       }),
-      ({ isPlayingAnimation, roomInfo }, prevProps) => {
-        if (roomInfo && roomInfo.gameState) {
+      ({ isBoardEmpty, roomInfo }) => {
+        if (roomInfo.status === RoomStatus.PLAYING && isBoardEmpty) {
+          this.updateBoardStates();
+        }
+      },
+      { fireImmediately: true },
+    );
+
+    reaction(
+      () => ({
+        isPlayingAnimation: appModel.gameModel.isPlayingAnimation,
+        currTurnSteps: appModel.gameModel.currTurnSteps,
+      }),
+      ({ isPlayingAnimation, currTurnSteps }, prevProps) => {
+        if (!isEmpty(currTurnSteps)) {
           if (isPlayingAnimation) {
-            if (prevProps?.isPlayingAnimation !== isPlayingAnimation) {
-              this.triggerMoveAnimation();
-            }
+            this.triggerMoveAnimation();
           } else {
             this.updateBoardStates();
           }
         }
       },
-      { fireImmediately: true },
     );
+  }
+
+  get isBoardEmpty() {
+    return [
+      this.iCurrPlayerSquares,
+      this.iRivalPlayerSquares,
+      this.iLeftBigSquare,
+      this.iRightBigSquare,
+    ].every(isEmpty);
   }
 
   get currPlayerSquares() {
@@ -116,22 +136,51 @@ export class ChessBoardViewModel {
     this.iRightBigSquare = this.rightBigSquare;
   };
 
-  triggerMoveAnimation = () => {
+  triggerMoveAnimation = async () => {
     const currTurnMove = appModel.gameModel.currTurnSteps;
     const { moveDirection, squareIndex, steps } = currTurnMove;
-    this.processStepsAnimation(steps);
+    console.log(
+      'super triggerMoveAnimation',
+      JSON.parse(
+        JSON.stringify({
+          currTurnMove,
+          game: appModel.gameModel.roomInfo.gameState,
+        }),
+      ),
+    );
+    await this.processStepsAnimation(steps);
+    appModel.gameModel.stopAnimation();
   };
 
-  processStepsAnimation = (steps: any[] = []) => {
-    steps.forEach(({ action, squareIndex, smallStoneNum, bigStoneNum }) => {
-      setTimeout(() => {
-        const squareId = getSquareId(squareIndex);
-        const squareElm = document.querySelector(`#${squareId}`);
-        this.animationCursorPosition = {
-          top: squareElm.getBoundingClientRect().top,
-          left: squareElm.getBoundingClientRect().left,
-        };
-      }, 1000);
-    });
+  processStepsAnimation = async (steps: IMoveStep[] = []) => {
+    for (const step of steps) {
+      const {
+        action,
+        squareIndex,
+        smallStoneNum,
+        bigStoneNum,
+        numOfStonesSelected,
+      } = step;
+      const squareId = getSquareId(squareIndex);
+      const squareElm = document.querySelector(`#${squareId}`);
+      console.log('super processStepsAnimation', { squareId });
+      this.animationCursorPayload = {
+        top: squareElm.getBoundingClientRect().top,
+        left: squareElm.getBoundingClientRect().left,
+        action,
+        smallStoneNum,
+        bigStoneNum,
+        numOfStonesSelected,
+      };
+      console.log(
+        'super processStepsAnimation',
+        JSON.parse(
+          JSON.stringify({
+            animationCursorPayload: this.animationCursorPayload,
+          }),
+        ),
+      );
+      await new Promise((resolve) => setTimeout(resolve, 600));
+    }
   };
 }

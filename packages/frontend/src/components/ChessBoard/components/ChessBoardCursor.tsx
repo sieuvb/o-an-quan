@@ -26,17 +26,22 @@ const CursorWrapper = styled.div<{ top?: number; left?: number }>`
 export const ChessBoardCursor: React.FC<IChessBoardCursorProps> = observer(
   ({ chessboardViewModel }) => {
     const { isPlayingAnimation } = appModel.gameModel;
-    const {
-      animationCursorPosition: { top, left },
-    } = chessboardViewModel;
+    const { animationCursorPayload } = chessboardViewModel;
 
+    if (!animationCursorPayload) {
+      return null;
+    }
+
+    const { top, left, numOfStonesSelected, action } = animationCursorPayload;
     return (
       <CursorWrapper
         className={classnames({ active: isPlayingAnimation })}
         top={top}
         left={left}
       >
-        Cursor
+        <h4>
+          {action} | {numOfStonesSelected}
+        </h4>
       </CursorWrapper>
     );
   },

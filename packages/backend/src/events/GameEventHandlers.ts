@@ -108,6 +108,7 @@ export class GameEventHandlers extends BaseEventHandler {
 
     return {
       event: USER_INPUT_STEP,
+      roomId,
       payload: {
         status: SocketResponseStatus.SUCCESS,
         data: roomInfo,

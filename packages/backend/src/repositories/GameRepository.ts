@@ -92,10 +92,12 @@ export class GameRepository {
     const roomInfo = this.roomsData[roomId];
     const currentTurn = roomInfo.gameState?.currentTurn;
     const players = roomInfo.gameState?.players;
-    roomInfo.gameState.players[currentTurn].playerGameInfo.bigStoneNum =
-      numOfBigStones;
-    roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum =
-      numOfSmallStones;
+    roomInfo.gameState.players[
+      currentTurn
+    ].playerGameInfo.bigStoneNum = numOfBigStones;
+    roomInfo.gameState.players[
+      currentTurn
+    ].playerGameInfo.smallStoneNum = numOfSmallStones;
     return roomInfo;
   };
 
@@ -106,7 +108,8 @@ export class GameRepository {
     const roomInfo = this.roomsData[roomId];
     const currentTurn = roomInfo.gameState?.currentTurn;
     const players = roomInfo.gameState?.players;
-    let smallStoneNum = roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum
+    let smallStoneNum =
+      roomInfo.gameState.players[currentTurn].playerGameInfo.smallStoneNum;
     smallStoneNum = smallStoneNum - numOfSmallStonesTaken;
     return roomInfo;
   };
@@ -114,12 +117,11 @@ export class GameRepository {
   switchTurn = (roomId: string) => {
     const roomInfo = this.roomsData[roomId];
     const currentTurn = roomInfo.gameState?.currentTurn;
-    const players = roomInfo.gameState?.players;
 
-    if (currentTurn + 1 >= players.length) {
-      roomInfo.gameState.currentTurn = 0;
+    if (currentTurn === 0) {
+      roomInfo.gameState.currentTurn = 1;
     } else {
-      roomInfo.gameState.currentTurn = currentTurn + 1;
+      roomInfo.gameState.currentTurn = 0;
     }
     return roomInfo;
   };

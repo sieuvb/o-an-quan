@@ -5,11 +5,11 @@ import {
   StepAction,
 } from '../enums/common';
 
-export type SquareIndex = number | 'left' | 'right';
+export type PlayerIndex = 0 | 1;
 export interface IChessSquare {
   //TODO
   id?: string;
-  playerIndex?: number;
+  playerIndex?: PlayerIndex;
   index: number;
   type: SquareType;
   smallStoneNum: number;
@@ -18,7 +18,7 @@ export interface IChessSquare {
 
 export interface IPlayer {
   id: string;
-  index: number;
+  index: PlayerIndex;
   name: string;
   deviceId: string;
   ipAddress: string;
@@ -33,14 +33,22 @@ export interface IPlayerGameInfo {
 
 export interface IGameState {
   players: IPlayer[];
-  currentTurn: number;
+  currentTurn: 0 | 1;
   squares: IChessSquare[];
+}
+
+export interface IMoveStep {
+  action: StepAction;
+  squareIndex: number;
+  smallStoneNum: number;
+  bigStoneNum: number;
+  numOfStonesSelected?: number;
 }
 
 export interface IGameStep {
   squareIndex: number;
   moveDirection: MoveDirection;
-  steps: any[];
+  steps: IMoveStep[];
 }
 
 export interface IRoomInfo {

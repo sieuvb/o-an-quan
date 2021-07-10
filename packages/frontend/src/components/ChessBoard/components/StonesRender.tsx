@@ -16,7 +16,7 @@ interface IStonesRenderProps {
 
 const StonesWrapper = styled.div<{ size: string }>`
   --small-stone-width: 120px;
-  --big-stone-width: 80px;
+  --big-stone-width: 100px;
   position: relative;
   width: ${({ size }) =>
     size === 'small' ? 'var(--small-stone-width)' : 'var(--big-stone-width)'};
