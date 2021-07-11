@@ -14,15 +14,24 @@ interface IStonesRenderProps {
   bigStonesNum: number;
 }
 
-const StonesWrapper = styled.div<{ size: string }>`
+const StonesWrapper = styled.div<{ size: string; stoneNum?: number }>`
   --small-stone-width: 120px;
   --big-stone-width: 100px;
   position: relative;
   width: ${({ size }) =>
     size === 'small' ? 'var(--small-stone-width)' : 'var(--big-stone-width)'};
+  height: ${({ size }) =>
+    size === 'small' ? 'var(--small-stone-width)' : 'var(--big-stone-width)'};
 
-  > &:after {
-    padding-bottom: 100%;
+  &::after {
+    position: absolute;
+    display: inline-block;
+    content: '${({ stoneNum }) => stoneNum}';
+    top: 0;
+    right: 0;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 24px;
   }
 
   > img {
@@ -56,7 +65,7 @@ export const StonesRender: React.FC<IStonesRenderProps> = ({
   return (
     <>
       {smallStonesNum > 0 && (
-        <StonesWrapper size="small">
+        <StonesWrapper size="small" stoneNum={smallStonesNum}>
           <img src={smallStonesImgSrc} alt="stone" />
         </StonesWrapper>
       )}

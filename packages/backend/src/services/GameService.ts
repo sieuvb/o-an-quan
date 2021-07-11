@@ -15,7 +15,12 @@ import {
   getPlayerIndexBySquareIndex,
 } from '@o-an-quan/shared';
 import { gameRepository } from '../repositories';
-import { TupleType } from 'typescript';
+
+const INITIAL_PLAYER_GAME_INFO = {
+  bigStoneNum: 0,
+  smallStoneNum: 0,
+  historySteps: [],
+};
 
 const initSquares = (
   numOfPlayers: number = 2,
@@ -47,11 +52,7 @@ export class GameService {
     const firstPlayerInfo: IPlayer = {
       ...firstPlayer,
       index: 0,
-      playerGameInfo: {
-        bigStoneNum: 0,
-        smallStoneNum: 0,
-        historySteps: [],
-      },
+      playerGameInfo: INITIAL_PLAYER_GAME_INFO,
     };
 
     const initialGameState: IGameState = {
@@ -116,6 +117,28 @@ export class GameService {
     }
     gameRepository.mapPlayerToRoom(playerid, roomInfo.id);
 
+    return newRoomInfo;
+  };
+
+  rematch = (playerId: string) => {
+    const roomId = gameRepository.getRoomIdByPlayerId(playerId);
+    const roomInfo = gameRepository.getRoomInfo(roomId);
+    const newPlayersData = roomInfo.gameState.players.map(
+      ({ playerGameInfo, ...rest }) => ({
+        ...rest,
+        playerGameInfo: INITIAL_PLAYER_GAME_INFO,
+      }),
+    );
+    const newRoomData: IRoomInfo = {
+      ...roomInfo,
+      status: RoomStatus.PLAYING,
+      gameState: {
+        players: newPlayersData,
+        currentTurn: 0,
+        squares: initSquares(),
+      },
+    };
+    const newRoomInfo = gameRepository.updateRoom(newRoomData);
     return newRoomInfo;
   };
 

@@ -1,4 +1,3 @@
 export * from './ChessBoard';
-export * from './PlayerCard';
 export * from './GameSharingLink';
-export * from './PlayerSection';
+export * from './PlayerInfoSection';

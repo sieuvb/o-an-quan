@@ -12,6 +12,7 @@ import {
   JOIN_ROOM_SUCCESS,
   RELOAD_ROOM,
   RELOAD_ROOM_SUCCESS,
+  REMATCH,
   USER_INPUT_STEP,
 } from '@o-an-quan/shared';
 import { appModel } from './AppModel';
@@ -47,6 +48,10 @@ export class SocketModel {
 
   reloadRoom = (playerId: string) => {
     this.socket.emit(RELOAD_ROOM, playerId);
+  };
+
+  rematch = (playerId: string) => {
+    this.socket.emit(REMATCH, playerId);
   };
 
   handleCreateRoomSuccess = (payload: ISocketResponsePayload<IRoomInfo>) => {

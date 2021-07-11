@@ -8,8 +8,9 @@ import { appModel } from 'models';
 import { getSquareId, IChessSquare, SquareType } from '@o-an-quan/shared';
 import smallStonesImg from 'assests/images/small-stones.png';
 import { SQUARE_TYPE } from '../constants';
-import { StonesRender } from './StonesRender';
+import { StonesRender } from '../../StonesRender';
 import { ChessBoardViewModel } from '../ChessBoardViewModel';
+import { observer } from 'mobx-react-lite';
 
 interface IDragSquareProps {
   className?: string;
@@ -80,7 +81,7 @@ const SquareContent = styled.div`
     top: 8px;
     right: 8px;
     font-size: 20px;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .stone-wrapper {
@@ -96,85 +97,81 @@ const SquareContent = styled.div`
       top: 0;
       right: 4px;
       font-size: 20px;
-      font-weight: 600;
+      font-weight: 500;
       line-height: 24px;
     }
   }
 `;
 
-export const DragSquare: React.FC<IDragSquareProps> = ({
-  className,
-  square,
-  chessboardViewModel,
-}) => {
-  const { isAllowInteract, currPlayer, checkValidStep } = appModel.gameModel;
-  const { setDraggingSquareIndex, draggingSquareIndex } = chessboardViewModel;
-  const canDragChecker = React.useCallback(
-    throttle(
-      () => isAllowInteract && square.playerIndex === currPlayer.index,
-      300,
-    ),
-    [],
-  );
-  const canDropChecker = React.useCallback(
-    throttle(
-      (draggingItem: IChessSquare) =>
-        checkValidStep(draggingItem.index, square.index),
-      300,
-    ),
-    [],
-  );
-  const [{ isDragging }, dragRef, preview] = useDrag<any, any, any>({
-    type: SQUARE_TYPE,
-    item: square,
-    canDrag: canDragChecker,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  });
-  const [{ canDrop, isOver }, dropRef] = useDrop<any, any, any>(() => ({
-    accept: SQUARE_TYPE,
-    canDrop: canDropChecker,
-    drop: (draggingItem: IChessSquare) => {
-      appModel.gameModel.moveStep(draggingItem.index, square.index);
-    },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-    }),
-  }));
+export const DragSquare: React.FC<IDragSquareProps> = observer(
+  ({ className, square, chessboardViewModel }) => {
+    const { isAllowInteract, currPlayer, checkValidStep } = appModel.gameModel;
+    const { setDraggingSquareIndex } = chessboardViewModel;
+    const canDragChecker = React.useCallback(
+      throttle(() => {
+        return isAllowInteract && square.playerIndex === currPlayer.index;
+      }, 300),
+      [isAllowInteract],
+    );
+    const canDropChecker = React.useCallback(
+      throttle(
+        (draggingItem: IChessSquare) =>
+          checkValidStep(draggingItem.index, square.index),
+        300,
+      ),
+      [],
+    );
+    const [{ isDragging }, dragRef, preview] = useDrag<any, any, any>({
+      type: SQUARE_TYPE,
+      item: square,
+      canDrag: canDragChecker,
+      collect: (monitor) => ({
+        isDragging: !!monitor.isDragging(),
+      }),
+    });
+    const [{ canDrop, isOver }, dropRef] = useDrop<any, any, any>(() => ({
+      accept: SQUARE_TYPE,
+      canDrop: canDropChecker,
+      drop: (draggingItem: IChessSquare) => {
+        appModel.gameModel.moveStep(draggingItem.index, square.index);
+      },
+      collect: (monitor) => ({
+        isOver: monitor.isOver(),
+        canDrop: monitor.canDrop(),
+      }),
+    }));
 
-  React.useEffect(() => {
-    if (isDragging) {
-      setDraggingSquareIndex(square.index);
-    }
-  }, [isDragging, square.index, setDraggingSquareIndex]);
+    React.useEffect(() => {
+      if (isDragging) {
+        setDraggingSquareIndex(square.index);
+      }
+    }, [isDragging, square.index, setDraggingSquareIndex]);
 
-  const { bigStoneNum, smallStoneNum, index } = square;
-  return (
-    <DragDropWrapper
-      id={getSquareId(index)}
-      ref={dragRef}
-      className={classnames(
-        {
-          dragging: isDragging,
-          valid: canDrop,
-          over: isOver,
-        },
-        className,
-      )}
-    >
-      <DragPreviewImage connect={preview} src={smallStonesImg} />
-      <div className="drop-space" ref={dropRef}>
-        <SquareContent>
-          <div className="left">{index}</div>
-          {smallStoneNum > 0 && <div className="right">{smallStoneNum}</div>}
-          <StonesRender
-            bigStonesNum={bigStoneNum}
-            smallStonesNum={smallStoneNum}
-          />
-        </SquareContent>
-      </div>
-    </DragDropWrapper>
-  );
-};
+    const { bigStoneNum, smallStoneNum, index } = square;
+    return (
+      <DragDropWrapper
+        id={getSquareId(index)}
+        ref={dragRef}
+        className={classnames(
+          {
+            dragging: isDragging,
+            valid: canDrop,
+            over: isOver,
+          },
+          className,
+        )}
+      >
+        <DragPreviewImage connect={preview} src={smallStonesImg} />
+        <div className="drop-space" ref={dropRef}>
+          <SquareContent>
+            <div className="left">{index}</div>
+            <StonesRender
+              bigStonesNum={bigStoneNum}
+              smallStonesNum={smallStoneNum}
+            />
+          </SquareContent>
+        </div>
+      </DragDropWrapper>
+    );
+  },
+);

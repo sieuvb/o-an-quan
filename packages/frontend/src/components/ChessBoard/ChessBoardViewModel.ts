@@ -7,45 +7,32 @@ import {
   IChessSquare,
   ICursorPayload,
   IMoveStep,
-  MoveDirection,
   PLAYER_SQUARES,
   RoomStatus,
 } from '@o-an-quan/shared';
 import { appModel } from 'models';
 
 export class ChessBoardViewModel {
-  iCurrPlayerSquares: IChessSquare[] = [];
-  iRivalPlayerSquares: IChessSquare[] = [];
-  iLeftBigSquare: IChessSquare = null;
-  iRightBigSquare: IChessSquare = null;
-  iRoomStatus: RoomStatus = null;
+  currViewSquares: IChessSquare[] = null;
+  roomStatus: RoomStatus = null;
   animationCursorPayload: ICursorPayload = null;
   draggingSquareIndex: number = null;
+  endGameModalVisible: boolean;
 
   constructor() {
     makeAutoObservable(this);
-    autorun(() => {
-      console.log(
-        'super',
-        JSON.parse(
-          JSON.stringify({
-            game: appModel.gameModel?.roomInfo,
-            currSteps: appModel.gameModel?.currTurnSteps,
-          }),
-        ),
-      );
-    });
-
     reaction(
       () => ({
         isBoardEmpty: this.isBoardEmpty,
         roomInfo: appModel.gameModel.roomInfo,
       }),
-      ({ isBoardEmpty, roomInfo }) => {
-        if (
-          roomInfo.status !== RoomStatus.WAITING_FOR_PLAYERS &&
-          isBoardEmpty
-        ) {
+      ({ isBoardEmpty, roomInfo }, prevProps) => {
+        const isFirstInitial =
+          roomInfo?.status !== RoomStatus.WAITING_FOR_PLAYERS && isBoardEmpty;
+        const isRematch =
+          roomInfo?.status === RoomStatus.PLAYING &&
+          prevProps?.roomInfo?.status === RoomStatus.FINISHED;
+        if (isFirstInitial || isRematch) {
           this.updateBoardStates();
         }
       },
@@ -67,98 +54,79 @@ export class ChessBoardViewModel {
         }
       },
     );
+
+    autorun(() => {
+      if (this.roomStatus === RoomStatus.FINISHED) {
+        this.showEndGame();
+      } else {
+        this.hideEndGame();
+      }
+    });
   }
 
   get isBoardEmpty() {
-    return [
-      this.iCurrPlayerSquares,
-      this.iRivalPlayerSquares,
-      this.iLeftBigSquare,
-      this.iRightBigSquare,
-    ].every(isEmpty);
+    return !this.currViewSquares;
   }
 
-  get currPlayerSquares() {
-    const { currPlayer, roomInfo } = appModel.gameModel;
-    if (!roomInfo || !roomInfo.gameState || !currPlayer) {
+  get normalizedMainSquares() {
+    return this.processSquares(appModel.gameModel.roomInfo?.gameState?.squares);
+  }
+
+  get normalizedViewSquares() {
+    return this.processSquares(this.currViewSquares);
+  }
+
+  processSquares = (squares: IChessSquare[]) => {
+    const { currPlayer, rivalPlayer } = appModel.gameModel;
+    if (!squares || !currPlayer || !rivalPlayer) {
       return null;
     }
-    const {
-      gameState: { squares },
-    } = roomInfo;
-    return sortBy(
+    const currPlayerSquares = sortBy(
       squares.filter(({ index }) =>
         PLAYER_SQUARES[currPlayer.index].includes(index),
       ),
       'index',
     );
-  }
-
-  get rivalPlayerSquares() {
-    const { rivalPlayer, roomInfo } = appModel.gameModel;
-    if (!roomInfo || !roomInfo.gameState || !rivalPlayer) {
-      return null;
-    }
-    const {
-      gameState: { squares },
-    } = roomInfo;
-    return sortBy(
+    const rivalPlayerSquares = sortBy(
       squares.filter(({ index }) =>
         PLAYER_SQUARES[rivalPlayer.index].includes(index),
       ),
       'index',
     );
-  }
+    const leftBigSquareIndex = (last(rivalPlayerSquares)?.index || 0) + 1;
+    const leftBigSquare = squares.find(
+      ({ index }) => index === leftBigSquareIndex,
+    );
+    const rightBigSquareIndex = (last(currPlayerSquares)?.index || 0) + 1;
+    const rightBigSquare = squares.find(
+      ({ index }) => index === rightBigSquareIndex,
+    );
 
-  get leftBigSquare() {
-    const { roomInfo } = appModel.gameModel;
-    if (!roomInfo || !roomInfo.gameState) {
-      return null;
-    }
-    const {
-      gameState: { squares },
-    } = roomInfo;
-    const leftBigSquareIndex = (last(this.rivalPlayerSquares)?.index || 0) + 1;
-    return squares.find(({ index }) => index === leftBigSquareIndex);
-  }
-
-  get rightBigSquare() {
-    const { roomInfo } = appModel.gameModel;
-    if (!roomInfo || !roomInfo.gameState) {
-      return null;
-    }
-    const {
-      gameState: { squares },
-    } = roomInfo;
-    const rightBigSquareIndex = (last(this.currPlayerSquares)?.index || 0) + 1;
-    return squares.find(({ index }) => index === rightBigSquareIndex);
-  }
+    return {
+      currPlayerSquares,
+      rivalPlayerSquares,
+      leftBigSquare,
+      rightBigSquare,
+    };
+  };
 
   updateBoardStates = () => {
-    this.iCurrPlayerSquares = this.currPlayerSquares;
-    this.iRivalPlayerSquares = this.rivalPlayerSquares;
-    this.iLeftBigSquare = this.leftBigSquare;
-    this.iRightBigSquare = this.rightBigSquare;
-    this.iRoomStatus = appModel.gameModel.roomInfo.status;
+    const { gameState, status } = appModel.gameModel.roomInfo;
+    this.currViewSquares = gameState?.squares;
+    this.roomStatus = status;
+  };
 
-    //TODO: Remove later
-    if (this.iRoomStatus) {
-      alert('Game finished');
-    }
+  setSingleSquareValue = (squareIndex: number, smallStoneNum, bigStoneNum) => {
+    this.currViewSquares[squareIndex] = {
+      ...this.currViewSquares[squareIndex],
+      smallStoneNum,
+      bigStoneNum,
+    };
   };
 
   triggerMoveAnimation = async () => {
     const currTurnMove = appModel.gameModel.currTurnSteps;
-    const { moveDirection, squareIndex, steps } = currTurnMove;
-    console.log(
-      'super triggerMoveAnimation',
-      JSON.parse(
-        JSON.stringify({
-          currTurnMove,
-          game: appModel.gameModel.roomInfo.gameState,
-        }),
-      ),
-    );
+    const { steps } = currTurnMove;
     await this.processStepsAnimation(steps);
     appModel.gameModel.stopAnimation();
   };
@@ -182,17 +150,18 @@ export class ChessBoardViewModel {
         bigStoneNum,
         numOfStonesSelected,
       };
-      console.log(
-        'super processStepsAnimation',
-        JSON.parse(
-          JSON.stringify({
-            squareId,
-            animationCursorPayload: this.animationCursorPayload,
-          }),
-        ),
-      );
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      this.setSingleSquareValue(squareIndex, smallStoneNum, bigStoneNum);
+      await new Promise((resolve) => setTimeout(resolve, 400));
     }
+  };
+
+  showEndGame = () => {
+    this.endGameModalVisible = true;
+  };
+
+  hideEndGame = () => {
+    this.endGameModalVisible = false;
   };
 
   setDraggingSquareIndex = (squareIndex: number) => {

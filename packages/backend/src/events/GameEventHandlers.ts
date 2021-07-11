@@ -13,6 +13,7 @@ import {
   RELOAD_ROOM_SUCCESS,
   SocketResponseStatus,
   MoveDirection,
+  REMATCH,
 } from '@o-an-quan/shared';
 import { gameService } from '../services';
 import { BaseEventHandler, SocketResponse } from './BaseEventHandler';
@@ -24,6 +25,7 @@ export class GameEventHandlers extends BaseEventHandler {
     this.subscribeEvent(JOIN_ROOM, this.joinRoomEventHandler);
     this.subscribeEvent(RELOAD_ROOM, this.reloadGameInfoHandler);
     this.subscribeEvent(USER_INPUT_STEP, this.userInputStepHandler);
+    this.subscribeEvent(REMATCH, this.rematchHandler);
   }
 
   createRoomEventHandler = (
@@ -103,12 +105,23 @@ export class GameEventHandlers extends BaseEventHandler {
 
   userInputStepHandler = (props: IInputStepProps): SocketResponse<any, any> => {
     const { roomId, squareIndex, moveDirection } = props;
-
     const roomInfo = gameService.inputStep(roomId, squareIndex, moveDirection);
-
     return {
       event: USER_INPUT_STEP,
       roomId,
+      payload: {
+        status: SocketResponseStatus.SUCCESS,
+        data: roomInfo,
+        error: null,
+      },
+    };
+  };
+
+  rematchHandler = (playerId: string): SocketResponse<IRoomInfo, any> => {
+    const roomInfo = gameService.rematch(playerId);
+    return {
+      event: RELOAD_ROOM_SUCCESS,
+      roomId: roomInfo.id,
       payload: {
         status: SocketResponseStatus.SUCCESS,
         data: roomInfo,

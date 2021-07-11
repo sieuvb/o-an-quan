@@ -16,15 +16,15 @@ const CardWrapper = styled.div`
     rgba(255, 255, 255, 0.3)
   );
   width: 168px;
+  height: 100%;
   border-radius: 2px;
-  margin: auto;
 `;
 
 const AvatarWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 120px;
+  height: 100px;
 `;
 
 const NameWrapper = styled.div`
@@ -52,7 +52,7 @@ export const PlayerCard: React.FC<IPlayerCard> = ({
   return (
     <CardWrapper>
       {!player ? (
-        <div>Waiting...</div>
+        <div style={{ textAlign: 'center' }}>Waiting...</div>
       ) : (
         <>
           <AvatarWrapper>

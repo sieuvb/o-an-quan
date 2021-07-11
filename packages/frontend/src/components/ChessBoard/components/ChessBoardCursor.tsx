@@ -15,7 +15,7 @@ const CursorWrapper = styled.div<{ top?: number; left?: number }>`
   left: 0;
   visibility: hidden;
   z-index: 2;
-  transition: 0.5s top left;
+  transition: 0.5s all;
 
   &.active {
     visibility: visible;

@@ -13,7 +13,12 @@ import {
   PLAYER_SQUARES,
   RoomStatus,
 } from '@o-an-quan/shared';
-import { BigSquare, SmallSquare, ChessBoardCursor } from './components';
+import {
+  BigSquare,
+  SmallSquare,
+  ChessBoardCursor,
+  EndGameModal,
+} from './components';
 import { layoutStyles } from './layoutStyles';
 import { ChessBoardViewModel } from './ChessBoardViewModel';
 import { useViewModel } from 'utils';
@@ -54,34 +59,32 @@ export interface IChessBoardProps {}
 
 export const ChessBoard: React.FC<IChessBoardProps> = observer(() => {
   const chessboardViewModel = useViewModel(ChessBoardViewModel);
-  const {
-    iCurrPlayerSquares,
-    iRivalPlayerSquares,
-    iLeftBigSquare,
-    iRightBigSquare,
-  } = chessboardViewModel;
+  const { normalizedViewSquares, endGameModalVisible } = chessboardViewModel;
 
-  if (
-    !iLeftBigSquare ||
-    !iRightBigSquare ||
-    !iCurrPlayerSquares ||
-    !iRivalPlayerSquares
-  ) {
+  if (!normalizedViewSquares) {
     return null;
   }
 
+  const {
+    currPlayerSquares,
+    rivalPlayerSquares,
+    leftBigSquare,
+    rightBigSquare,
+  } = normalizedViewSquares;
+
   return (
     <DndProvider backend={HTML5Backend}>
+      <EndGameModal visible={endGameModalVisible} />
       <BoardWrapper>
         <ChessBoardCursor chessboardViewModel={chessboardViewModel} />
         <BigSquare
           chessboardViewModel={chessboardViewModel}
-          square={iLeftBigSquare}
+          square={leftBigSquare}
           type={BigSquareType.LEFT}
         />
         <SmallSquaresWrapper>
           <SmallSquaresRow isReversed>
-            {iRivalPlayerSquares.map((square) => (
+            {rivalPlayerSquares.map((square) => (
               <SmallSquare
                 key={square.index}
                 square={square}
@@ -91,7 +94,7 @@ export const ChessBoard: React.FC<IChessBoardProps> = observer(() => {
             ))}
           </SmallSquaresRow>
           <SmallSquaresRow>
-            {iCurrPlayerSquares.map((square) => (
+            {currPlayerSquares.map((square) => (
               <SmallSquare
                 key={square.index}
                 square={square}
@@ -103,7 +106,7 @@ export const ChessBoard: React.FC<IChessBoardProps> = observer(() => {
         </SmallSquaresWrapper>
         <BigSquare
           chessboardViewModel={chessboardViewModel}
-          square={iRightBigSquare}
+          square={rightBigSquare}
           type={BigSquareType.RIGHT}
         />
       </BoardWrapper>

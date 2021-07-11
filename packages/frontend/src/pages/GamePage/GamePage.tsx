@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { appModel } from 'models';
-import { PlayerSection, ChessBoard, GameSharingLink } from 'components';
+import { PlayerInfoSection, ChessBoard, GameSharingLink } from 'components';
 import { RoomStatus } from '@o-an-quan/shared';
 import { PageWrapper } from './styles';
 
@@ -20,9 +20,9 @@ export const GamePage = observer(() => {
 
   return (
     <PageWrapper>
-      <PlayerSection player={rivalPlayer} currTurn={currTurn} />
+      <PlayerInfoSection player={rivalPlayer} currTurn={currTurn} />
       {roomInfo?.gameState && <ChessBoard />}
-      <PlayerSection player={currPlayer} isCurrPlayer currTurn={currTurn} />
+      <PlayerInfoSection player={currPlayer} isCurrPlayer currTurn={currTurn} />
       {isShowRoomLink && (
         <GameSharingLink className="link-sharing" link={gameSharingLink} />
       )}

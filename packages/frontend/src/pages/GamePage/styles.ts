@@ -9,9 +9,9 @@ export const PageWrapper = styled.div`
   height: 100vh;
 
   > .link-sharing {
-    position: absolute;
+    position: fixed;
     width: 300px;
-    top: 35%;
+    top: 0;
     left: calc(50% - 150px);
   }
 `;

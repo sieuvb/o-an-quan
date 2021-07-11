@@ -1,4 +1,5 @@
 import {
+  checkIsAdjacentSquare,
   getSquareId,
   IRoomInfo,
   MoveDirection,
@@ -11,99 +12,6 @@ import last from 'lodash/last';
 import { makeAutoObservable } from 'mobx';
 import { nanoid } from 'nanoid';
 import { appModel } from './AppModel';
-
-const MOCK_GAME_ROOM = {
-  id: 'EBRYdpExO2lZhfmLthhuo',
-  status: RoomStatus.WAITING_FOR_PLAYERS,
-  gameState: {
-    players: [],
-    currentTurn: 1,
-    squares: [
-      {
-        index: 0,
-        playerIndex: 1,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 1,
-        playerIndex: 1,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 2,
-        playerIndex: 1,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 3,
-        playerIndex: 1,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 4,
-        playerIndex: 1,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 5,
-        type: 'BIG_SQUARE',
-        smallStoneNum: 0,
-        bigStoneNum: 1,
-      },
-      {
-        index: 6,
-        playerIndex: 2,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 7,
-        playerIndex: 2,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 8,
-        playerIndex: 2,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 9,
-        playerIndex: 2,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 10,
-        playerIndex: 2,
-        type: 'SMALL_SQUARE',
-        smallStoneNum: 5,
-        bigStoneNum: 0,
-      },
-      {
-        index: 11,
-        type: 'BIG_SQUARE',
-        smallStoneNum: 0,
-        bigStoneNum: 1,
-      },
-    ],
-  },
-};
 
 export class GameModel {
   roomInfo: IRoomInfo | null = null;
@@ -136,10 +44,6 @@ export class GameModel {
 
   get currTurnSteps() {
     const currTurn = this.roomInfo?.gameState?.currentTurn;
-    console.log(
-      'super',
-      JSON.parse(JSON.stringify({ currTurn, room: this.roomInfo })),
-    );
     const currPlayerSteps = this.roomInfo?.gameState.players[currTurn]
       ?.playerGameInfo?.historySteps;
     const lastMoveSteps = last(currPlayerSteps);
@@ -186,8 +90,10 @@ export class GameModel {
     selectedSquareIndex: number,
     droppedSquareIndex: number,
   ) => {
-    const isAdjacentSquares =
-      Math.abs(selectedSquareIndex - droppedSquareIndex) === 1;
+    const isAdjacentSquares = checkIsAdjacentSquare(
+      selectedSquareIndex,
+      droppedSquareIndex,
+    );
     const isValidSquares =
       this.checkIfSquareBelongCurrPlayer(selectedSquareIndex) &&
       isAdjacentSquares;
@@ -227,10 +133,9 @@ export class GameModel {
       squareIndex: selectedSquareIndex,
       moveDirection,
     });
-    console.log('super input', {
-      selectedSquareIndex,
-      droppedSquareIndex,
-      moveDirection,
-    });
+  };
+
+  rematch = () => {
+    appModel.socketModel.rematch(this.currPlayerId);
   };
 }

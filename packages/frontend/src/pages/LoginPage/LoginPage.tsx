@@ -60,6 +60,7 @@ export const LoginPage = observer(() => {
       <Input
         style={{ width: '300px' }}
         placeholder="Please input nick name"
+        minLength={20}
         onChange={handlePlayerNameChange}
       />
       <Tabs activeKey={activeTabKey} onChange={handleTabChange}>
